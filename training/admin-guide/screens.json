@@ -60,10 +60,10 @@
     "height": 1000,
     "targets": {
       "focus": {
-        "x": 14,
-        "y": 94.828125,
-        "width": 340.875,
-        "height": 872
+        "x": 15,
+        "y": 95.828125,
+        "width": 338.875,
+        "height": 827.609375
       }
     },
     "file": "screens/overview-1.png",
@@ -170,6 +170,69 @@
     },
     "file": "screens/purchase.png"
   },
+  "overview-passport": {
+    "x": 0,
+    "y": 0,
+    "width": 1600,
+    "height": 1000,
+    "targets": {
+      "focus": {
+        "x": 384.875,
+        "y": 465.375,
+        "width": 369.046875,
+        "height": 433.375
+      }
+    },
+    "file": "screens/overview-passport.png",
+    "state": {
+      "source": "Попов Владимир Геннадьевич\nПравое ухо: Terra BTE-SP\nЛевое ухо: Terra BTE-SP\nИтого 74 000 руб., наша рассрочка.\nВ подарок: батарейки и футляр.",
+      "city": "Москва",
+      "documentYear": "2026",
+      "fullName": "Попов Владимир Геннадьевич",
+      "product": "Terra BTE-SP — 2 шт.",
+      "total": "74 000",
+      "downPayment": "37 000",
+      "months": "3",
+      "contractDate": "28.10.2026",
+      "passport": "0000 123456"
+    }
+  },
+  "identity-form": {
+    "x": 375,
+    "y": 462,
+    "width": 388,
+    "height": 262,
+    "targets": {
+      "passport": {
+        "x": 9.875,
+        "y": 25.765625,
+        "width": 369.046875,
+        "height": 38.296875
+      },
+      "issuer": {
+        "x": 9.875,
+        "y": 193.078125,
+        "width": 369.046875,
+        "height": 62
+      }
+    },
+    "file": "screens/identity-form.png"
+  },
+  "identity-document": {
+    "x": 935,
+    "y": 518,
+    "width": 277,
+    "height": 68,
+    "targets": {
+      "passport": {
+        "x": 44.28125,
+        "y": 39.015625,
+        "width": 47.25,
+        "height": 10
+      }
+    },
+    "file": "screens/identity-document.png"
+  },
   "overview-3": {
     "x": 0,
     "y": 0,
@@ -265,20 +328,5 @@
       "contractDate": "28.10.2026",
       "passport": "0000 123456"
     }
-  },
-  "download": {
-    "x": 1399,
-    "y": 14,
-    "width": 184,
-    "height": 51,
-    "targets": {
-      "download": {
-        "x": 5.203125,
-        "y": 5.765625,
-        "width": 173.796875,
-        "height": 40.296875
-      }
-    },
-    "file": "screens/download.png"
   }
 }

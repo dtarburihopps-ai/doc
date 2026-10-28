@@ -91,29 +91,41 @@ def where(top,active):
         text(label,x+8,top+7,width-16,10.5,'Bold'if i==active else'Body',GREEN if i==active else MUTED)
 
 TITLES=['Настройте город и год','Вставьте информацию о рассрочке','Проверьте данные','Проверьте договор справа','Скачайте договор']
-PAGES=len(TITLES)
-def header(step,lead=None):
-    c.bookmarkPage('step'+str(step));c.addOutlineEntry('Шаг '+str(step)+'. '+TITLES[step],'step'+str(step),0)
+PAGES=6
+page_index=0
+def header(step,lead=None,title=None,continuation=False):
     c.drawImage(str(HERE/'logo.png'),M,H-49,width=112,height=112*176/670,mask='auto')
     text('ПАМЯТКА АДМИНИСТРАТОРУ',W-269,30,227,9,'Bold',MUTED)
-    text('ШАГ '+str(step),M,73,CW,11,'Bold',PURPLE)
-    text(TITLES[step],M,96,CW,23,'Bold',INK,29)
+    text('ШАГ '+str(step)+(' · ПРОДОЛЖЕНИЕ' if continuation else ''),M,73,CW,11,'Bold',PURPLE)
+    text(title or TITLES[step],M,96,CW,23,'Bold',INK,29)
     if lead:text(lead,M,140,CW,12,leading=17)
 
 def footer(step):
+    global page_index
+    page_index+=1
     line(M,800,W-M,800,LINE,.8)
-    text('Договор рассрочки · '+str(step+1)+' / '+str(PAGES),M,811,270,9,color=MUTED)
-    if step<PAGES-1:
-        text('Дальше →',W-175,808,133,10.5,'Bold',GREEN)
-        c.linkRect('','step'+str(step+1),(W-180,H-828,W-M,H-804),relative=0,thickness=0)
+    text('Договор рассрочки · '+str(page_index)+' / '+str(PAGES),M,811,270,9,color=MUTED)
     c.showPage()
 
-def overview(step,top=192,caption=None):
+def overview(step,top=192,caption=None,action=None):
     im=image('overview-'+str(step),(W-470)/2,top,470)
     r=META[im['name']]['targets']['focus'];x=im['x']+r['x']*im['scale'];y=im['top']+r['y']*im['scale']
     w=r['width']*im['scale'];h=r['height']*im['scale']
     c.setStrokeColor(HexColor(PURPLE));c.setLineWidth(1.7);c.roundRect(x-1,H-y-h-1,w+2,h+2,3,fill=0,stroke=1)
-    if step==4:
+    if action:
+        # Connect the action paragraph directly to the relevant area, using
+        # whitespace above the screenshot and the gutter beside the columns.
+        start=(M+pdfmetrics.stringWidth(action,'Body',12)+7,165)
+        if step==1:
+            target=(x-2,y+18);gutter=im['x']-7
+            arrow([start,(start[0],182),(gutter,182),(gutter,target[1]),target])
+        elif step=='passport':
+            target=(x+w+2,y+18);gutter=x+w+8
+            arrow([start,(start[0],182),(gutter,182),(gutter,target[1]),target])
+        else:
+            target=(x+w/2,y-2)
+            arrow([start,(start[0],182),(target[0],182),target])
+    elif step==4:
         text('Кнопка — вверху справа',305,166,248,11,'Bold',PURPLE)
         arrow([(x+w/2,184),(x+w/2,y-2)])
     else:
@@ -142,9 +154,9 @@ footer(0)
 
 # Step 1: message already pasted, but recognition has not run yet.
 header(1,'Вставьте сообщение специалиста в левое окно<br/>и нажмите «Распознать».')
-overview(1,192,'Информация о рассрочке — здесь')
+overview(1,192,action='и нажмите «Распознать».')
 image('source',M,539,319)
-text('Файл сам разберёт<br/>обычное сообщение.<br/><br/><b>Подарки в договор<br/>не попадут.</b>',390,548,163,12,leading=17)
+text('Файл сам разберёт обычное сообщение и возьмёт только нужную информацию.',390,548,163,12,leading=17)
 image('recognize',390,662,163)
 arrow([(472,652),(472,667)])
 text('Нажмите «Распознать».',385,713,168,10.5,'Bold',GREEN)
@@ -154,7 +166,7 @@ footer(1)
 
 # Step 2: the next complete overview visibly contains the recognition results.
 header(2,'После «Распознать» данные появились во втором окне.<br/>Любое поле можно исправить или заполнить вручную.')
-overview(2,192,'Заполненные поля — здесь')
+overview(2,192,action='Любое поле можно исправить или заполнить вручную.')
 image('purchase',M,539,230)
 text('<b>Если взнос и срок не указаны:</b><br/>50% — первый взнос,<br/>остаток — на 3 месяца.',292,539,261,11.5,leading=16)
 text('Измените взнос или срок —<br/>платежи пересчитаются сами.',292,604,261,11.5,leading=16)
@@ -163,9 +175,18 @@ text('<b>Если сумма делится с копейками:</b><br/>37 00
 text('Проверьте сумму<br/>и график платежей.',292,771,261,10.5,'Bold',PURPLE,leading=12)
 footer(2)
 
+# Step 2 continues with identity details before moving on to the final document.
+header(2,'Во втором окне прокрутите ниже — до «Реквизиты покупателя».<br/>Введите данные: они сразу появятся в договоре справа.',title='Внесите паспортные данные',continuation=True)
+overview('passport',192,action='Введите данные: они сразу появятся в договоре справа.')
+image('identity-form',M,539,265)
+text('<b>Здесь вводим паспортные данные.</b><br/><br/>Ниже — адрес и телефон.<br/><br/>Все реквизиты сразу отобразятся справа.',331,539,222,12,leading=17)
+text('Так эти данные появились<br/>в договоре:',310,677,243,11,'Bold',PURPLE,leading=15)
+image('identity-document',310,720,243)
+footer(2)
+
 # Step 3: manual identity data and contract date are now filled in too.
 header(3,'Справа уже заполнены договор и график платежей.<br/>Если нужна правка — нажмите на нужный текст.')
-overview(3,192,'Готовый договор — справа')
+overview(3,192,action='Если нужна правка — нажмите на нужный текст.')
 image('document',M,539,CW)
 im=image('calendar',M,646,286)
 target=point(im,'amount','right');arrow([(339,635),(339,target[1]),target])
@@ -177,11 +198,10 @@ footer(3)
 # Step 4: one button and the browser's default download folder, no printing tutorial.
 header(4,'Нажмите «Скачать и распечатать» — скачается договор Word.')
 overview(4,192)
-image('download',101,541,393)
-text('Файл сохранится в папке, выбранной для загрузок<br/>в браузере. Обычно это <b>«Загрузки»</b>.',M,675,CW,13,leading=19)
-text('Откройте скачанный Word и распечатайте.',M,728,CW,12)
-box(M,760,CW,29,'#EDF6F0','#EDF6F0')
-text('<b>Данные клиента после закрытия HTML не сохраняются.</b>',M+12,767,CW-24,10.5,color=GREEN)
+text('Файл сохранится в папке, выбранной для загрузок<br/>в браузере. Обычно это <b>«Загрузки»</b>.',M,539,CW,13,leading=19)
+text('Откройте скачанный Word и распечатайте.',M,598,CW,12)
+box(M,650,CW,43,'#EDF6F0','#EDF6F0')
+text('<b>Данные клиента после закрытия HTML не сохраняются.</b><br/>Перед закрытием скачайте договор.',M+12,658,CW-24,10.5,color=GREEN,leading=14)
 footer(4)
 c.save()
 print('Built',dest)
