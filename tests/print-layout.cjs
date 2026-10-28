@@ -38,12 +38,17 @@ const message='Попов Владимир Геннадьевич\nПравое 
      const serialize=n=>n.nodeType===3?[3,n.nodeValue]:n.nodeType===1?[1,n.namespaceURI,n.localName,[...n.attributes].map(a=>[a.namespaceURI,a.name,a.value]),[...n.childNodes].map(serialize).filter(Boolean)]:null;
      return {tree:serialize(d.documentElement),scrollWidth:d.documentElement.scrollWidth,overflow:[...d.body.querySelectorAll('*')].filter(p=>p.getBoundingClientRect().right>795).map(p=>[p.tagName,p.className.baseVal??p.className,p.getBoundingClientRect().right]),pages:[...d.querySelectorAll('section.docx')].map(p=>{
        const rect=p.getBoundingClientRect(),a=p.querySelector('article'),f=p.querySelector('footer');
-       return {width:rect.width,height:rect.height,articleBottom:a?.getBoundingClientRect().bottom-rect.top,footerTop:f?.getBoundingClientRect().top-rect.top,paragraphs:[...a.querySelectorAll('p')].map(p=>p.textContent)};
+       return {width:rect.width,height:rect.height,articleBottom:a?.getBoundingClientRect().bottom-rect.top,footerTop:f?.getBoundingClientRect().top-rect.top,footerFields:[...p.querySelectorAll('footer [data-word-field="PAGE"]')].map(n=>n.textContent),footerImages:[...p.querySelectorAll('footer img')].map(n=>({loaded:n.complete&&n.naturalWidth>0,width:n.getBoundingClientRect().width,height:n.getBoundingClientRect().height})),paragraphs:[...a.querySelectorAll('p')].map(p=>p.textContent)};
      })};
    });
    assert(data.pages.length>=2);
    assert(data.scrollWidth<=795,'Document must not cause shrink-to-fit');assert.equal(data.overflow.length,0);
-   for(const p of data.pages){assert(Math.abs(p.width-210*96/25.4)<1);assert(Math.abs(p.height-297*96/25.4)<1);assert(p.articleBottom<=p.footerTop,'Contract text must fit above its footer')}
+   for(const [index,p]of data.pages.entries()){
+     assert(Math.abs(p.width-210*96/25.4)<1);assert(Math.abs(p.height-297*96/25.4)<1);assert(p.articleBottom<=p.footerTop,'Contract text must fit above its footer');
+     assert.deepEqual(p.footerFields,index?[String(index+1)]:[],'Word PAGE field must count real pages');
+     assert.equal(p.footerImages.length,1);assert(p.footerImages[0].loaded,'Footer strip must be decoded before print');
+     assert(Math.abs(p.footerImages[0].width-467.45*96/72)<.1,'Keep original Word drawing dimensions');
+   }
    const printable=await browser.newPage();
    // Preserve the renderer's DOM, including its SVG nesting. Re-parsing outerHTML
    // would let the HTML parser rearrange blocks inside Word paragraphs.
@@ -51,7 +56,7 @@ const message='Попов Владимир Геннадьевич\nПравое 
      function build(n){if(n[0]===3)return document.createTextNode(n[1]);const el=document.createElementNS(n[1],n[2]);for(const [ns,key,val]of n[3])el.setAttributeNS(ns,key,val);for(const child of n[4])el.append(build(child));return el}
      document.replaceChild(build(tree),document.documentElement);
    },data.tree);await printable.evaluate(()=>document.fonts.ready);
-   await printable.pdf({path:path.join(output,label+'.pdf'),preferCSSPageSize:true,printBackground:true});
+   await printable.pdf({path:path.join(output,label+'.pdf'),preferCSSPageSize:true,printBackground:false});
    await printable.close();results.push({label,...data,tree:undefined});
  }
  for(const [zoom,width]of [['.6',900],['.75',1440],['.9',1920],['1',1100]]){
@@ -69,6 +74,10 @@ const message='Попов Владимир Геннадьевич\nПравое 
  await page.fill('#passportIssuer','Учебный отдел выдачи документов, подразделение регистрации и учёта, Тюменская область, город Тюмень');
  await page.fill('#address','г. Тюмень, Учебная улица, дом 10, корпус 2, квартира 150, второй подъезд, этаж 12');
  await page.evaluate(()=>ContractApp.flush());await capture('twelve-months');
+ await page.fill('#passportIssuer','Учебный отдел выдачи документов и регистрации населения. '.repeat(12));
+ await page.fill('#address','Учебный город, Учебная улица, дом 10, корпус 2, квартира 150. '.repeat(8));
+ await page.evaluate(()=>ContractApp.flush());await capture('three-pages');
+ assert(results.at(-1).pages.length>=3,'Exercise automatic PAGE 3 and following pages');
  // Printing after clearing must not leak data from the previous customer.
  await page.click('#clear');await page.evaluate(()=>ContractApp.flush());
  assert.equal(await page.inputValue('#fullName'),'');assert.equal(await page.inputValue('#city'),'Тюмень');

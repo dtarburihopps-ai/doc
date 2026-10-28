@@ -34,9 +34,16 @@ for result in results:
     images = [im for page in doc for im in page.get_image_info()]
     assert images[0]['width'] == 670  # New original logo, not the old 558px logo.
     assert abs(images[0]['bbox'][2] - images[0]['bbox'][0] - 152.96) < .1
+    assert len(images) == len(doc) + 1, 'Logo plus a visible strip on every printed page'
     for strip in images[1:]:
         assert strip['width'] in [2440, 2483]
-        assert abs(strip['bbox'][2] - strip['bbox'][0] - 467.45) < .1
+        # Chromium rounds HTML image paint bounds to physical pixels; the DOM
+        # test above verifies the exact Word shape dimensions before printing.
+        assert abs(strip['bbox'][2] - strip['bbox'][0] - 467.45) < .76
+    for index, page in enumerate(doc):
+        if index:
+            footer_text = page.get_text(clip=fitz.Rect(0, 740, page.rect.width, page.rect.height))
+            assert str(index+1) in footer_text.split(), 'Automatic page number is missing'
     spans = [s for page in doc for block in page.get_text('dict')['blocks'] if 'lines' in block
              for line in block['lines'] for s in line['spans']]
     assert any(abs(s['size'] - 9) < .01 for s in spans), 'No automatic print scaling'
@@ -100,6 +107,9 @@ with ZipFile(OUT / 'filled.docx') as z:
     assert 'Тюмень' in ''.join(doc.xpath('//w:t/text()', namespaces=NS))
     with ZipFile(ROOT / 'assets/contract-layout.docx') as letterhead:
         assert z.read('word/media/image2.png') == letterhead.read('word/media/image2.png')
+        assert z.read('word/footer1.xml') == letterhead.read('word/footer1.xml')
+    footer = ET.fromstring(z.read('word/footer1.xml'))
+    assert footer.xpath('//w:fldSimple[starts-with(@w:instr,"PAGE")]', namespaces=NS), 'Downloaded Word must keep its actual PAGE field'
 
-print('Verified: 7 print scenarios, identical A4 geometry at 4 zoom levels, no missing text,')
-print('12-month schedule, manual edits in Word, native print shortcut, original artwork and contract text.')
+print(f'Verified: {len(results)} print scenarios, identical A4 geometry at 4 zoom levels, no missing text,')
+print('Visible footer strips with backgrounds off, automatic PAGE 2/3, and unchanged PAGE fields in Word.')
