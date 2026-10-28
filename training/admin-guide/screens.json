@@ -1,132 +1,201 @@
 {
-  "settings": {
-    "x": 22,
-    "y": 695,
-    "width": 325,
-    "height": 306,
+  "overview-0": {
+    "x": 0,
+    "y": 0,
+    "width": 1600,
+    "height": 1000,
     "targets": {
-      "summary": {
-        "x": 8,
-        "y": 8.921875,
+      "focus": {
+        "x": 30,
+        "y": 678.3125,
         "width": 308.875,
-        "height": 17.390625
-      },
+        "height": 265.515625
+      }
+    },
+    "file": "screens/overview-0.png",
+    "state": {
+      "source": "",
+      "city": "Сочи",
+      "documentYear": "2026",
+      "fullName": "",
+      "product": "",
+      "total": "",
+      "downPayment": "",
+      "months": "3",
+      "contractDate": "",
+      "passport": ""
+    }
+  },
+  "settings": {
+    "x": 23,
+    "y": 646,
+    "width": 323,
+    "height": 248,
+    "targets": {
       "city": {
-        "x": 8,
-        "y": 58.703125,
+        "x": 7,
+        "y": 57.703125,
         "width": 308.875,
         "height": 35.390625
       },
       "year": {
-        "x": 8,
-        "y": 129.484375,
+        "x": 7,
+        "y": 128.484375,
         "width": 308.875,
         "height": 35.390625
       },
       "save": {
-        "x": 8,
-        "y": 177.875,
+        "x": 7,
+        "y": 176.875,
         "width": 85.640625,
         "height": 37.390625
-      },
-      "saved": {
-        "x": 8,
-        "y": 222.265625,
-        "width": 308.875,
-        "height": 17.390625
       }
     },
     "file": "screens/settings.png"
+  },
+  "overview-1": {
+    "x": 0,
+    "y": 0,
+    "width": 1600,
+    "height": 1000,
+    "targets": {
+      "focus": {
+        "x": 14,
+        "y": 94.828125,
+        "width": 340.875,
+        "height": 872
+      }
+    },
+    "file": "screens/overview-1.png",
+    "state": {
+      "source": "Попов Владимир Геннадьевич\nПравое ухо: Terra BTE-SP\nЛевое ухо: Terra BTE-SP\nИтого 74 000 руб., наша рассрочка.\nВ подарок: батарейки и футляр.",
+      "city": "Москва",
+      "documentYear": "2026",
+      "fullName": "",
+      "product": "",
+      "total": "",
+      "downPayment": "",
+      "months": "3",
+      "contractDate": "",
+      "passport": ""
+    }
   },
   "source": {
     "x": 25,
     "y": 201,
     "width": 319,
-    "height": 245,
+    "height": 205,
     "targets": {
       "text": {
         "x": 5,
         "y": 5.609375,
         "width": 308.875,
-        "height": 594.359375
+        "height": 544.359375
       }
     },
     "file": "screens/source.png"
   },
   "recognize": {
-    "x": 24,
-    "y": 789,
-    "width": 321,
-    "height": 122,
+    "x": 25,
+    "y": 757,
+    "width": 224,
+    "height": 51,
     "targets": {
       "recognize": {
-        "x": 6,
-        "y": 6.578125,
+        "x": 5,
+        "y": 5.96875,
         "width": 213.921875,
         "height": 40.296875
-      },
-      "result": {
-        "x": 6,
-        "y": 58.875,
-        "width": 308.875,
-        "height": 56.78125
       }
     },
     "file": "screens/recognize.png"
   },
-  "date": {
-    "x": 376,
-    "y": 573,
-    "width": 386,
-    "height": 70,
+  "overview-2": {
+    "x": 0,
+    "y": 0,
+    "width": 1600,
+    "height": 1000,
     "targets": {
-      "date": {
-        "x": 8.875,
-        "y": 2.421875,
-        "width": 188.859375,
-        "height": 38.296875
-      },
-      "calendar": {
-        "x": 205.734375,
-        "y": 2.375,
-        "width": 84.53125,
-        "height": 33.390625
-      },
-      "today": {
-        "x": 298.265625,
-        "y": 1.421875,
-        "width": 79.65625,
-        "height": 40.296875
+      "focus": {
+        "x": 368.875,
+        "y": 94.828125,
+        "width": 401.046875,
+        "height": 872
       }
     },
-    "file": "screens/date.png"
+    "file": "screens/overview-2.png",
+    "state": {
+      "source": "Попов Владимир Геннадьевич\nПравое ухо: Terra BTE-SP\nЛевое ухо: Terra BTE-SP\nИтого 74 000 руб., наша рассрочка.\nВ подарок: батарейки и футляр.",
+      "city": "Москва",
+      "documentYear": "2026",
+      "fullName": "Попов Владимир Геннадьевич",
+      "product": "Terra BTE-SP — 2 шт.",
+      "total": "74 000",
+      "downPayment": "37 000",
+      "months": "3",
+      "contractDate": "",
+      "passport": ""
+    }
   },
-  "fields": {
-    "x": 374,
-    "y": 578,
-    "width": 390,
-    "height": 374,
+  "purchase": {
+    "x": 375,
+    "y": 181,
+    "width": 388,
+    "height": 409,
     "targets": {
-      "passport": {
-        "x": 10.875,
-        "y": 26.765625,
+      "product": {
+        "x": 9.875,
+        "y": 25.984375,
+        "width": 369.046875,
+        "height": 62
+      },
+      "total": {
+        "x": 9.875,
+        "y": 148.609375,
         "width": 369.046875,
         "height": 38.296875
       },
-      "issuer": {
-        "x": 10.875,
-        "y": 194.078125,
+      "pv": {
+        "x": 9.875,
+        "y": 242.234375,
         "width": 369.046875,
-        "height": 62
+        "height": 38.296875
       },
-      "address": {
-        "x": 10.875,
-        "y": 296.765625,
+      "months": {
+        "x": 9.875,
+        "y": 364.796875,
         "width": 369.046875,
-        "height": 62
+        "height": 38.296875
       }
     },
-    "file": "screens/fields.png"
+    "file": "screens/purchase.png"
+  },
+  "overview-3": {
+    "x": 0,
+    "y": 0,
+    "width": 1600,
+    "height": 1000,
+    "targets": {
+      "focus": {
+        "x": 783.921875,
+        "y": 94.828125,
+        "width": 802.078125,
+        "height": 872
+      }
+    },
+    "file": "screens/overview-3.png",
+    "state": {
+      "source": "Попов Владимир Геннадьевич\nПравое ухо: Terra BTE-SP\nЛевое ухо: Terra BTE-SP\nИтого 74 000 руб., наша рассрочка.\nВ подарок: батарейки и футляр.",
+      "city": "Москва",
+      "documentYear": "2026",
+      "fullName": "Попов Владимир Геннадьевич",
+      "product": "Terra BTE-SP — 2 шт.",
+      "total": "74 000",
+      "downPayment": "37 000",
+      "months": "3",
+      "contractDate": "28.10.2026",
+      "passport": "0000 123456"
+    }
   },
   "document": {
     "x": 906,
@@ -151,7 +220,7 @@
   },
   "calendar": {
     "x": 979,
-    "y": 511,
+    "y": 486,
     "width": 500,
     "height": 151,
     "targets": {
@@ -170,34 +239,46 @@
     },
     "file": "screens/calendar.png"
   },
+  "overview-4": {
+    "x": 0,
+    "y": 0,
+    "width": 1600,
+    "height": 1000,
+    "targets": {
+      "focus": {
+        "x": 1404.203125,
+        "y": 19.765625,
+        "width": 173.796875,
+        "height": 40.296875
+      }
+    },
+    "file": "screens/overview-4.png",
+    "state": {
+      "source": "Попов Владимир Геннадьевич\nПравое ухо: Terra BTE-SP\nЛевое ухо: Terra BTE-SP\nИтого 74 000 руб., наша рассрочка.\nВ подарок: батарейки и футляр.",
+      "city": "Москва",
+      "documentYear": "2026",
+      "fullName": "Попов Владимир Геннадьевич",
+      "product": "Terra BTE-SP — 2 шт.",
+      "total": "74 000",
+      "downPayment": "37 000",
+      "months": "3",
+      "contractDate": "28.10.2026",
+      "passport": "0000 123456"
+    }
+  },
   "download": {
-    "x": 1400,
-    "y": 15,
-    "width": 182,
-    "height": 49,
+    "x": 1399,
+    "y": 14,
+    "width": 184,
+    "height": 51,
     "targets": {
       "download": {
-        "x": 4.203125,
-        "y": 4.765625,
+        "x": 5.203125,
+        "y": 5.765625,
         "width": 173.796875,
         "height": 40.296875
       }
     },
     "file": "screens/download.png"
-  },
-  "clear": {
-    "x": 22,
-    "y": 787,
-    "width": 325,
-    "height": 57,
-    "targets": {
-      "clear": {
-        "x": 229.921875,
-        "y": 8.578125,
-        "width": 86.953125,
-        "height": 40.296875
-      }
-    },
-    "file": "screens/clear.png"
   }
 }

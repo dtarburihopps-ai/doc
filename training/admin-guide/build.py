@@ -72,112 +72,98 @@ def where(top,active):
         x=M+i*(width+gap);box(x,top,width,29,'#EAF3EE'if i==active else'#F6F8F6',GREEN if i==active else LINE,r=7)
         text(label,x+8,top+7,width-16,10.5,'Bold'if i==active else'Body',GREEN if i==active else MUTED)
 
-TITLES=['Настройте город и год','Вставьте текст клиента','Дополните пустые поля','Проверьте договор справа','Скачайте и распечатайте','Следующий клиент']
-def header(step,lead):
+TITLES=['Настройте город и год','Вставьте информацию о рассрочке','Проверьте данные','Проверьте договор справа','Скачайте договор']
+PAGES=len(TITLES)
+def header(step,lead=None):
     c.bookmarkPage('step'+str(step));c.addOutlineEntry('Шаг '+str(step)+'. '+TITLES[step],'step'+str(step),0)
     c.drawImage(str(HERE/'logo.png'),M,H-49,width=112,height=112*176/670,mask='auto')
     text('ПАМЯТКА АДМИНИСТРАТОРУ',W-269,30,227,9,'Bold',MUTED)
-    tag='ШАГ 0 · ОДИН РАЗ'if step==0 else'ШАГ '+str(step)
-    text(tag,M,76,CW,11,'Bold',PURPLE)
-    text(TITLES[step],M,101,CW,25,'Bold',INK,31)
-    text(lead,M,145,CW,13,leading=19)
+    text('ШАГ '+str(step),M,73,CW,11,'Bold',PURPLE)
+    text(TITLES[step],M,96,CW,23,'Bold',INK,29)
+    if lead:text(lead,M,140,CW,12,leading=17)
 
 def footer(step):
     line(M,800,W-M,800,LINE,.8)
-    text('Договор рассрочки · '+str(step+1)+' / 6',M,811,270,9,color=MUTED)
-    label='Дальше →'if step<5 else'К заполнению →';target='step'+str(step+1)if step<5 else'step1'
-    text(label,W-175,808,133,10.5,'Bold',GREEN);c.linkRect('',target,(W-180,H-828,W-M,H-804),relative=0,thickness=0)
+    text('Договор рассрочки · '+str(step+1)+' / '+str(PAGES),M,811,270,9,color=MUTED)
+    if step<PAGES-1:
+        text('Дальше →',W-175,808,133,10.5,'Bold',GREEN)
+        c.linkRect('','step'+str(step+1),(W-180,H-828,W-M,H-804),relative=0,thickness=0)
     c.showPage()
 
-# 0: opening and settings, with the one-time nature stated before any screenshot.
-header(0,'Настройте <b>один раз</b> перед первым договором.<br/>Потом — только если нужно изменить город или год.')
-box(M,197,CW,62,'#F5F7F5',LINE)
-text('Получили ZIP? Сначала распакуйте архив.<br/>Откройте <b>«Договор рассрочки.html»</b> двойным щелчком в Chrome или Edge.',M+14,208,CW-28,11.5)
-where(275,0)
-text('Внизу левого окна раскройте «Настройки».',M,320,CW,12)
-im=image('settings',246,350,307)
-for number,key,title,body in [(1,'city','Ваш город','Например, Москва.'),(2,'year','Нужный год','Год договора.'),(3,'save','«Сохранить»','Нажмите эту кнопку.')]:
-    target=point(im,key,'left');top=target[1]-26;box(M,top,180,51,'#FFFFFF','#E3D4EA',r=8);badge(number,M+9,top+12)
-    text(title,M+42,top+7,128,12,'Bold',PURPLE);text(body,M+42,top+27,128,10.5,color=MUTED)
-    arrow([(M+180,target[1]),(target[0]-8,target[1]),target])
-note('Появилось «Сохранено» — готово.', 'Открывайте этот же HTML в том же браузере.',665,63)
-text('«Сохранить» запоминает город и год.<br/>Сам договор скачиваем отдельно — на шаге 4.',M,744,CW,11.5,color=MUTED)
+def overview(step,top=192,caption=None):
+    im=image('overview-'+str(step),(W-470)/2,top,470)
+    r=META[im['name']]['targets']['focus'];x=im['x']+r['x']*im['scale'];y=im['top']+r['y']*im['scale']
+    w=r['width']*im['scale'];h=r['height']*im['scale']
+    c.setStrokeColor(HexColor(PURPLE));c.setLineWidth(1.7);c.roundRect(x-1,H-y-h-1,w+2,h+2,3,fill=0,stroke=1)
+    if step==4:
+        text('Кнопка — вверху справа',305,166,248,11,'Bold',PURPLE)
+        arrow([(x+w/2,184),(x+w/2,y-2)])
+    else:
+        target=(x+w/2,y+h-2)
+        # Keep the connector outside the caption, whichever side the area is on.
+        label_width=pdfmetrics.stringWidth(caption,'Bold',11)
+        label_x=M if M+label_width+20<target[0] else target[0]+18
+        text(caption,label_x,top+im['h']+11,W-M-label_x,11,'Bold',PURPLE)
+        connector_x=label_x+label_width+8 if label_x<target[0] else label_x-8
+        start_y=top+im['h']+19
+        arrow([(connector_x,start_y),(target[0],start_y),target])
+    return im
+
+# Step 0: original empty Sochi state, then a close-up after saving a new office.
+header(0)
+box(M,141,CW,65,'#EDF6F0','#EDF6F0')
+text('<b>Настроить надо только один раз — город и год сохранятся.</b><br/>Если понадобится поменять их снова — повторите шаг 0.',M+14,151,CW-28,11.5,color=GREEN,leading=17)
+overview(0,224,'Настройки — внизу левого окна')
+im=image('settings',293,580,260)
+for number,key,title,body in [(1,'city','Укажите свой город','Например, Москва.'),(2,'year','Укажите нужный год','Год договора.'),(3,'save','Нажмите «Сохранить»','Появилось «Сохранено» — готово.')]:
+    target=point(im,key,'left');top=target[1]-20;badge(number,M,top+1)
+    text(title,M+33,top,204,11.5,'Bold',PURPLE)
+    text(body,M+33,top+19,204,10,color=MUTED,leading=13)
+    arrow([(279,target[1]),target])
 footer(0)
 
-# 1: two real close-ups, rather than a tiny screenshot of the whole application.
-header(1,'Скопируйте сообщение клиента и вставьте его в левое окно.')
-where(192,0)
-text('1. Вставьте весь текст',M,242,CW,14,'Bold')
-im=image('source',M,275,340)
-box(402,292,151,122,'#F5F7F5',LINE)
-text('Скопировать<br/><b>Ctrl + C</b><br/><br/>Вставить<br/><b>Ctrl + V</b>',416,305,123,12)
-arrow([(402,350),(389,350),(im['x']+im['w']-8,im['top']+80*im['scale'])])
-text('На скриншотах — вымышленные данные.',M,548,CW,9.5,color=MUTED)
-text('2. Нажмите «Распознать»',M,581,CW,14,'Bold')
-im=image('recognize',M,614,340)
-text('Данные появятся<br/>в средней колонке.<br/><br/><b>Дальше —<br/>проверка.</b>',404,625,147,12,color=GREEN)
-box(M,757,CW,32,'#EDF6F0','#EDF6F0')
-text('Нет сообщения? <b>Заполните поля сами на шаге 2.</b>',M+14,764,CW-28,11.5,color=GREEN)
+# Step 1: message already pasted, but recognition has not run yet.
+header(1,'Вставьте сообщение специалиста в левое окно<br/>и нажмите «Распознать».')
+overview(1,192,'Информация о рассрочке — здесь')
+image('source',M,539,319)
+text('Файл сам разберёт<br/>обычное сообщение.<br/><br/><b>Подарки в договор<br/>не попадут.</b>',390,548,163,12,leading=17)
+image('recognize',390,662,163)
+arrow([(472,652),(472,667)])
+text('Нажмите «Распознать».',385,713,168,10.5,'Bold',GREEN)
+box(M,756,CW,32,'#EDF6F0','#EDF6F0')
+text('Нет текста? Заполните второе окно вручную.',M+14,764,CW-28,11.5,color=GREEN)
 footer(1)
 
-# 2: enough of the form to explain manual input, not an instruction per field.
-header(2,'Средняя колонка — все данные договора.<br/>Любое поле можно заполнить или исправить.')
-where(205,1)
-im=image('fields',258,267,285)
-box(M,281,187,159,'#F4F8F5',LINE)
-text('Пустое поле?<br/><b>Впишите данные сами.</b><br/><br/>Можно заполнить всю форму вручную, даже без текста слева.',M+14,296,159,12.5)
-target=point(im,'address','left');arrow([(229,370),(243,370),(243,target[1]),target])
-text('Изменили поле →<br/>договор справа<br/>обновился.',M,470,185,13,'Bold',GREEN)
-text('Дату тоже можно выбрать',M,568,CW,14,'Bold')
-image('date',M,603,CW)
-text('Введите дату вручную, выберите календарь<br/>или нажмите «Сегодня».',M,720,CW,12)
+# Step 2: the next complete overview visibly contains the recognition results.
+header(2,'После «Распознать» данные появились во втором окне.<br/>Любое поле можно исправить или заполнить вручную.')
+overview(2,192,'Заполненные поля — здесь')
+image('purchase',M,539,230)
+text('<b>Если взнос и срок не указаны:</b><br/>50% — первый взнос,<br/>остаток — на 3 месяца.',292,539,261,11.5,leading=16)
+text('Измените взнос или срок —<br/>платежи пересчитаются сами.',292,604,261,11.5,leading=16)
+box(285,648,268,117,'#F5F7F5',LINE)
+text('<b>Если сумма делится с копейками:</b><br/>37 000 ÷ 3 = 12 333,33 ₽.<br/><b>12 300 + 12 300 + 12 400 = 37 000 ₽.</b><br/>Первые платежи округляются до сотен.<br/>Последний выравнивает остаток.',297,658,244,10.5,leading=17)
+text('Проверьте сумму<br/>и график платежей.',292,771,261,10.5,'Bold',PURPLE,leading=12)
 footer(2)
 
-# 3: large close-ups of editable content and the payment calendar.
-header(3,'Нажмите на текст, если нужно что-то исправить.<br/>Двойной щелчок выделяет значение для замены.')
-where(205,2)
-text('Сверьте ФИО и наименование товара',M,252,CW,13,'Bold')
-image('document',M,287,CW)
-box(M,389,CW,43,'#F3EEF6','#F3EEF6')
-text('Можно исправлять и поля в средней колонке,<br/>и сам текст договора справа.',M+14,397,CW-28,11.5,color=PURPLE)
-text('Проверьте даты и суммы платежей',M,459,CW,13,'Bold')
-im=image('calendar',M,499,CW)
-target=point(im,'amount','right');arrow([(W-M+8,485),(W-M+8,target[1]),target])
-text('Нажмите на сумму,<br/>если нужна правка.',340,452,213,10.5,color=PURPLE)
-box(M,685,CW,98,'#F4F8F5',LINE)
-text('<b>Перед скачиванием проверьте:</b><br/>• ФИО и реквизиты покупателя;<br/>• аппараты, стоимость и взнос;<br/>• дату, срок и весь график платежей.',M+15,696,CW-30,12)
+# Step 3: manual identity data and contract date are now filled in too.
+header(3,'Справа уже заполнены договор и график платежей.<br/>Если нужна правка — нажмите на нужный текст.')
+overview(3,192,'Готовый договор — справа')
+image('document',M,539,CW)
+im=image('calendar',M,646,286)
+target=point(im,'amount','right');arrow([(339,635),(339,target[1]),target])
+text('<b>График считается сам.</b><br/>Первый платёж — через месяц,<br/>дальше — каждый месяц.<br/>Можно ничего не менять.<br/><br/>Если нужно — нажмите<br/>на дату или сумму.',350,644,203,10.5,leading=14)
+box(M,755,CW,34,'#FFF7E6','#FFF7E6')
+text('<b>Перед печатью проверьте все данные:</b><br/>ФИО, аппараты, реквизиты, суммы и даты.',M+12,760,CW-24,10.5,color='#725715',leading=13)
 footer(3)
 
-# 4: the actual current download control, followed by an explicit Word workflow.
-header(4,'Сначала скачайте файл. Затем откройте его в Word и печатайте.')
-text('1. Нажмите кнопку вверху справа',M,205,CW,14,'Bold')
-im=image('download',M+32,247,320)
-target=point(im,'download','right');arrow([(492,308),(492,target[1]),target])
-text('Кнопка скачивает<br/>документ Word.',427,250,126,11.5,color=GREEN)
-text('2. Найдите скачанный файл и откройте его',M,363,CW,14,'Bold')
-box(M,401,CW,93,'#F4F8F5',LINE)
-text('<b>Папка «Загрузки» → Заполненный_ФИО.docx</b><br/>Откройте этот файл в Word.<br/><font color="'+MUTED+'">Не нашли? В браузере нажмите Ctrl + J — откроются загрузки.</font>',M+15,416,CW-30,11.5)
-text('3. В Word нажмите Ctrl + P',M,526,CW,14,'Bold')
-box(M,565,148,61,'#FFFFFF','#D2DDEB')
-text('Ctrl + P',M+20,579,108,22,'Bold','#285A8D')
-arrow([(M+165,595),(M+198,595)],GREEN)
-text('Выберите принтер<br/>и нажмите «Печать».',M+220,575,285,13)
-note('Word спросил об обновлении полей?', 'Нажмите «Да» — это обновит номер страницы.',665,68,color='#725715',fill='#FFF7E6')
-text('Перед закрытием HTML обязательно скачайте договор.',M,754,CW,11.5,color=MUTED)
+# Step 4: one button and the browser's default download folder, no printing tutorial.
+header(4,'Нажмите «Скачать и распечатать» — скачается договор Word.')
+overview(4,192)
+image('download',101,541,393)
+text('Файл сохранится в папке, выбранной для загрузок<br/>в браузере. Обычно это <b>«Загрузки»</b>.',M,675,CW,13,leading=19)
+text('Откройте скачанный Word и распечатайте.',M,728,CW,12)
+box(M,760,CW,29,'#EDF6F0','#EDF6F0')
+text('<b>Данные клиента после закрытия HTML не сохраняются.</b>',M+12,767,CW-24,10.5,color=GREEN)
 footer(4)
-
-# 5: reset for the next customer.
-header(5,'Сначала скачайте готовый договор предыдущего клиента.')
-where(191,0)
-text('Нажмите «Очистить»',M,254,CW,14,'Bold')
-im=image('clear',M+20,298,430)
-target=point(im,'clear','top');arrow([(W-M,265),(W-M,285),(target[0],285),target])
-box(M,405,CW,62,'#F5F7F5',LINE)
-text('Если появится вопрос об очистке — подтвердите.<br/><b>Поля и исходный текст снова станут пустыми.</b>',M+15,418,CW-30,12)
-text('Город и год останутся.',M,496,CW,16,'Bold',GREEN)
-text('Теперь вставьте новое сообщение или заполните поля вручную.<br/>Вернитесь к шагу 1 →',M,530,CW,12.5)
-c.linkRect('','step1',(M,H-571,W-M,H-529),relative=0,thickness=0)
-text('Данные клиента после закрытия HTML не сохраняются.<br/>Сохраняйте нужный договор кнопкой «Скачать и распечатать».',M,590,CW,11.5,color=MUTED)
-footer(5)
 c.save()
 print('Built',dest)
