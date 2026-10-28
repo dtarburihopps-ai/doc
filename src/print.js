@@ -1,6 +1,20 @@
 /* Print the document in its own A4 frame, independently of the editor's zoom,
    columns, window width and scroll position. No network or external assets. */
 (() => {
+  function normalizeXml(documentXml, settingsXml) {
+    const ns = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+    const even = settingsXml.getElementsByTagNameNS(ns, 'evenAndOddHeaders')[0];
+    const enabled = even && !['0', 'false', 'off'].includes(even.getAttributeNS(ns, 'val'));
+    if (!enabled) {
+      // Word ignores dormant even-page parts when this setting is off.
+      // Apply this only to the temporary browser rendering copy.
+      for (const tag of ['headerReference', 'footerReference']) {
+        for (const ref of [...documentXml.getElementsByTagNameNS(ns, tag)]) {
+          if (ref.getAttributeNS(ns, 'type') === 'even') ref.remove();
+        }
+      }
+    }
+  }
   function normalizeDocument(root, sourceXml) {
     // Word stretches these pictures to the shape's declared dimensions.
     // SVG's default "meet" instead makes the new footer strip too narrow.
@@ -19,6 +33,16 @@
       if (indent) table.style.marginInlineStart = `${Number(indent.getAttributeNS(ns, 'w')) / 20}pt`;
       const layout = props.getElementsByTagNameNS(ns, 'tblLayout')[0];
       if (layout?.getAttributeNS(ns, 'type') === 'fixed') table.style.tableLayout = 'fixed';
+      const cells = [...sources[index].getElementsByTagNameNS(ns, 'tc')];
+      [...table.querySelectorAll('td, th')].forEach((cell, cellIndex) => {
+        const direction = cells[cellIndex]?.getElementsByTagNameNS(ns, 'textDirection')[0];
+        if (direction?.getAttributeNS(ns, 'val') === 'lrTb') {
+          // lrTb is Word's ordinary left-to-right horizontal text. The bundled
+          // renderer incorrectly maps that explicit value to vertical-lr.
+          cell.style.writingMode = 'horizontal-tb';
+          cell.style.transform = 'none';
+        }
+      });
     });
   }
   const css = `
@@ -86,5 +110,5 @@
     frame.contentWindow.focus();
     frame.contentWindow.print();
   }
-  window.ContractPrint = { prepare, run, normalizeDocument };
+  window.ContractPrint = { prepare, run, normalizeDocument, normalizeXml };
 })();

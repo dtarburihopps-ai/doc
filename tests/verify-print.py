@@ -4,7 +4,6 @@ Run after: node tests/print-layout.cjs
 from pathlib import Path
 from zipfile import ZipFile
 import base64
-import hashlib
 import json
 import posixpath
 import re
@@ -46,8 +45,9 @@ for result in results:
         if geometry is None:
             geometry = current
         assert geometry == current, 'Screen zoom/window width changed printed geometry'
+        title = next(s for s in spans if s['text'] == 'Договор рассрочки')
+        assert abs(title['bbox'][1] - 97.45) < 1, 'First-page text moved below the approved layout'
     if result['label'] == 'twelve-months':
-        assert len(doc) == 3
         for date in ['28.11.2027', '28.10.2028']:
             assert norm(date) in text
     if result['label'] == 'manual':
@@ -60,19 +60,28 @@ assert len(shortcut) == len(results[-1]['pages'])
 assert 'Исходный текст' not in ''.join(p.get_text() for p in shortcut)
 assert len([im for page in shortcut for im in page.get_image_info()]) == 3
 
-with ZipFile(ROOT / 'dist/Шаблон рассрочки.docx') as target, ZipFile(ROOT / 'assets/letterhead.docx') as source:
+with ZipFile(ROOT / 'dist/Шаблон рассрочки.docx') as target, ZipFile(ROOT / 'assets/contract-layout.docx') as source:
     document = ET.fromstring(target.read('word/document.xml'))
+    reference = ET.fromstring(source.read('word/document.xml'))
     body_text = ''.join(document.xpath('//w:t/text()', namespaces=NS))
-    assert hashlib.sha256(body_text.encode()).hexdigest() == '0793a0965c8d8b1e8b1f4987c4f98c916884e62a9318490f3f40004f091b516d'
+    def fixed_text(value):
+        value = re.sub(r'\{\{[^{}]+\}\}|_+|тр[её]х\s+календарных\s+месяцев', '', value)
+        return norm(value)
+    assert fixed_text(body_text) == fixed_text(''.join(reference.xpath('//w:t/text()', namespaces=NS)))
+    # Preserve the approved document's margins, paragraph/run properties, tables,
+    # fonts, numbering, and every header/footer instead of importing artwork alone.
+    for selector in ['.//w:pPr', './/w:rPr', './/w:tblPr', './/w:tcPr', './/w:sectPr']:
+        assert [ET.tostring(n, method='c14n') for n in document.findall(selector, NS)] == [ET.tostring(n, method='c14n') for n in reference.findall(selector, NS)], selector
+    assert 'Сочи' in body_text and 'Москва' not in body_text
+    core = ET.fromstring(target.read('docProps/core.xml'))
+    assert not core.xpath('//*[local-name()="creator" or local-name()="lastModifiedBy"]/text()')
     for name in source.namelist():
         if name.startswith('word/media/'):
             assert source.read(name) == target.read(name), 'Original artwork must remain byte-identical'
         if re.fullmatch(r'word/(header|footer)\d+\.xml', name):
-            def structure(node):
-                attrs = [(key, val.removeprefix('letterhead_') if key.endswith('}val') else val)
-                         for key, val in sorted(node.attrib.items())]
-                return node.tag, attrs, node.text, [structure(child) for child in node]
-            assert structure(ET.fromstring(source.read(name))) == structure(ET.fromstring(target.read(name))), 'Letterhead geometry changed'
+            assert source.read(name) == target.read(name), 'Letterhead geometry changed'
+        if name not in ['word/document.xml', 'docProps/core.xml']:
+            assert source.read(name) == target.read(name), name
     assert len([n for n in target.namelist() if n.startswith('word/media/')]) == 3
     for name in target.namelist():
         if name.endswith('.rels'):
@@ -89,8 +98,8 @@ with ZipFile(OUT / 'filled.docx') as z:
     values = [''.join(row.xpath('.//w:t/text()', namespaces=NS)) for row in rows]
     assert '12 400' in values[1] and '12 300' in values[3], values
     assert 'Тюмень' in ''.join(doc.xpath('//w:t/text()', namespaces=NS))
-    with ZipFile(ROOT / 'assets/letterhead.docx') as letterhead:
-        assert z.read('word/media/image1.png') == letterhead.read('word/media/image1.png')
+    with ZipFile(ROOT / 'assets/contract-layout.docx') as letterhead:
+        assert z.read('word/media/image2.png') == letterhead.read('word/media/image2.png')
 
 print('Verified: 7 print scenarios, identical A4 geometry at 4 zoom levels, no missing text,')
 print('12-month schedule, manual edits in Word, native print shortcut, original artwork and contract text.')

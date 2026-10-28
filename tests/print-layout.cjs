@@ -17,6 +17,9 @@ const message='Попов Владимир Геннадьевич\nПравое 
  page.on('dialog',d=>d.accept());
  await page.goto('http://127.0.0.1:'+server.address().port);
  await page.waitForSelector('#preview [data-bind]');await page.evaluate(()=>ContractApp.flush());
+ assert.equal(await page.inputValue('#city'),'Сочи');assert.equal(await page.inputValue('#documentYear'),'2026');
+ for(const id of ['surname','firstname','patronymic','fullName','product','total','downPayment','contractDate','passport','passportDate','passportIssuer','address','phone'])assert.equal(await page.inputValue('#'+id),'','Initial template has customer data in '+id);
+ assert((await page.locator('#preview').textContent()).includes('Сочи'));assert(!(await page.locator('#preview').textContent()).includes('Москва'));
  await page.locator('details summary').click();await page.fill('#city','Тюмень');await page.fill('#documentYear','2027');await page.click('#saveSettings');
  assert.equal(await page.locator('#settingsStatus').textContent(),'Сохранено');
  await page.fill('#source',message);await page.click('#recognize');await page.fill('#contractDate','28.10.2027');await page.locator('#contractDate').press('Tab');await page.evaluate(()=>ContractApp.flush());
