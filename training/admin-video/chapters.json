@@ -1,43 +1,60 @@
 {
   "appSha256": "d8a1c7aacfaa639fdbef2575975f34477fdefdbcf777fd9ac3f4d4cf25c631cf",
-  "duration": 148.76,
+  "duration": 123.28,
   "chapters": [
     {
       "step": 0,
-      "title": "Настройте город и год",
+      "title": "Нажмите «Настройки»",
       "time": 0
     },
     {
       "step": 1,
       "title": "Вставьте информацию о рассрочке",
-      "time": 20.84
+      "time": 20.12
     },
     {
       "step": 2,
       "title": "Проверьте данные во втором окне",
-      "time": 37.8
+      "time": 30.92
     },
     {
       "step": 2,
-      "title": "Паспортные данные — ниже во втором окне",
-      "time": 72.2
+      "title": "Прокрутите до «Реквизиты покупателя»",
+      "time": 59.12
     },
     {
       "step": 3,
       "title": "Проверьте договор справа",
-      "time": 97.08
+      "time": 85.36
     },
     {
       "step": 4,
       "title": "Нажмите «Скачать и распечатать»",
-      "time": 131.6
+      "time": 109.64
     }
   ],
   "checks": {
     "wordDownloaded": true,
     "officeSaved": true,
     "automaticDeposit": true,
-    "termChanged": true,
+    "noTermChangeDemo": true,
+    "noFloatingFrames": true,
+    "fullPrintedPages": [
+      {
+        "page": 1,
+        "x": 674.40625,
+        "y": 165.84375,
+        "width": 571.1875,
+        "height": 808.3125
+      },
+      {
+        "page": 2,
+        "x": 674.40625,
+        "y": 165.84375,
+        "width": 571.1875,
+        "height": 808.3125
+      }
+    ],
     "identityInPreview": true,
     "roundedAmounts": [
       12300,
