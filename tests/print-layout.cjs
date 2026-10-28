@@ -36,17 +36,19 @@ const message='Попов Владимир Геннадьевич\nПравое 
    const data=await page.evaluate(()=>{
      const d=document.querySelector('#contractPrintFrame').contentDocument;
      const serialize=n=>n.nodeType===3?[3,n.nodeValue]:n.nodeType===1?[1,n.namespaceURI,n.localName,[...n.attributes].map(a=>[a.namespaceURI,a.name,a.value]),[...n.childNodes].map(serialize).filter(Boolean)]:null;
-     return {tree:serialize(d.documentElement),scrollWidth:d.documentElement.scrollWidth,overflow:[...d.body.querySelectorAll('*')].filter(p=>p.getBoundingClientRect().right>795).map(p=>[p.tagName,p.className.baseVal??p.className,p.getBoundingClientRect().right]),pages:[...d.querySelectorAll('section.docx')].map(p=>{
+     return {tree:serialize(d.documentElement),baseFont:getComputedStyle(d.documentElement).fontSize,editorBaseFont:getComputedStyle(document.documentElement).fontSize,scrollWidth:d.documentElement.scrollWidth,overflow:[...d.body.querySelectorAll('*')].filter(p=>p.getBoundingClientRect().right>795).map(p=>[p.tagName,p.className.baseVal??p.className,p.getBoundingClientRect().right]),pages:[...d.querySelectorAll('section.docx')].map(p=>{
        const rect=p.getBoundingClientRect(),a=p.querySelector('article'),f=p.querySelector('footer');
-       return {width:rect.width,height:rect.height,articleBottom:a?.getBoundingClientRect().bottom-rect.top,footerTop:f?.getBoundingClientRect().top-rect.top,footerFields:[...p.querySelectorAll('footer [data-word-field="PAGE"]')].map(n=>n.textContent),footerStyles:[...p.querySelectorAll('footer [data-word-field="PAGE"]')].map(n=>{const c=getComputedStyle(n);return{fontFamily:c.fontFamily,fontSize:c.fontSize,color:c.color}}),footerImages:[...p.querySelectorAll('footer img')].map(n=>({loaded:n.complete&&n.naturalWidth>0,width:n.getBoundingClientRect().width,height:n.getBoundingClientRect().height})),paragraphs:[...a.querySelectorAll('p')].map(p=>p.textContent)};
+       return {width:rect.width,height:rect.height,boxes:[...p.children].filter(n=>['HEADER','ARTICLE','FOOTER'].includes(n.tagName)).map(n=>({position:getComputedStyle(n).position,top:n.getBoundingClientRect().top-rect.top,expectedTop:parseFloat(n.style.getPropertyValue('--word-box-top')),left:n.getBoundingClientRect().left-rect.left,expectedLeft:parseFloat(n.style.getPropertyValue('--word-box-left'))})),articleBottom:a?.getBoundingClientRect().bottom-rect.top,footerTop:f?.getBoundingClientRect().top-rect.top,footerFields:[...p.querySelectorAll('footer [data-word-field="PAGE"]')].map(n=>n.textContent),footerStyles:[...p.querySelectorAll('footer [data-word-field="PAGE"]')].map(n=>{const c=getComputedStyle(n);return{fontFamily:c.fontFamily,fontSize:c.fontSize,color:c.color}}),footerImages:[...p.querySelectorAll('footer img')].map(n=>({loaded:n.complete&&n.naturalWidth>0,width:n.getBoundingClientRect().width,height:n.getBoundingClientRect().height})),paragraphs:[...a.querySelectorAll('p')].map(p=>p.textContent)};
      })};
    });
    assert(data.pages.length>=2);
+   assert.equal(data.baseFont,data.editorBaseFont,'Printing must retain the editor base metrics');
    assert(data.scrollWidth<=795,'Document must not cause shrink-to-fit');assert.equal(data.overflow.length,0);
    for(const [index,p]of data.pages.entries()){
      assert(Math.abs(p.width-210*96/25.4)<1);assert(Math.abs(p.height-297*96/25.4)<1);assert(p.articleBottom<=p.footerTop,'Contract text must fit above its footer');
+     for(const box of p.boxes){assert.equal(box.position,'absolute');assert(Math.abs(box.top-box.expectedTop)<.1);assert(Math.abs(box.left-box.expectedLeft)<.1)}
      assert.deepEqual(p.footerFields,index?[String(index+1)]:[],'Word PAGE field must count real pages');
-     for(const style of p.footerStyles){assert(style.fontFamily.includes('Tw Cen MT'));assert(style.fontFamily.includes('Arial, sans-serif'));assert.equal(style.fontSize,'16px');assert.equal(style.color,'rgb(128, 128, 128)')}
+     for(const style of p.footerStyles){assert(style.fontFamily.includes('Tw Cen MT'));assert(style.fontFamily.includes('Arial, sans-serif'));assert.equal(style.fontSize,'16px');assert.equal(style.color,'rgb(0, 0, 0)')}
      assert.equal(p.footerImages.length,1);assert(p.footerImages[0].loaded,'Footer strip must be decoded before print');
      assert(Math.abs(p.footerImages[0].width-467.45*96/72)<.1,'Keep original Word drawing dimensions');
    }
@@ -57,12 +59,14 @@ const message='Попов Владимир Геннадьевич\nПравое 
      function build(n){if(n[0]===3)return document.createTextNode(n[1]);const el=document.createElementNS(n[1],n[2]);for(const [ns,key,val]of n[3])el.setAttributeNS(ns,key,val);for(const child of n[4])el.append(build(child));return el}
      document.replaceChild(build(tree),document.documentElement);
    },data.tree);await printable.evaluate(()=>document.fonts.ready);
+   if(label==='rounded-paper')await printable.addStyleTag({content:'@page { size: 210mm 296.9mm; margin: 0; }'});
    await printable.pdf({path:path.join(output,label+'.pdf'),preferCSSPageSize:true,printBackground:false});
    await printable.close();results.push({label,...data,tree:undefined});
  }
  for(const [zoom,width]of [['.6',900],['.75',1440],['.9',1920],['1',1100]]){
    await page.setViewportSize({width,height:1000});await page.selectOption('#zoom',zoom);await capture('zoom-'+zoom);
  }
+ await capture('rounded-paper');
  // Real typing in the editable preview must reach both printing and Word.
  await page.selectOption('#zoom','1');
  const amount=page.locator('#preview [data-bind="pay0amount"]').first();

@@ -95,11 +95,10 @@
           field.dataset.wordField = 'PAGE';
           field.textContent = String(start + index);
           // Keep the Word footer font (Tw Cen MT in this template), with a
-          // sans-serif fallback for PCs without that Office font. Match the
-          // gray page-number reference supplied by the user.
+          // sans-serif fallback for PCs without that Office font.
           field.style.fontFamily = `${originalStyle.fontFamily}, Arial, sans-serif`;
           field.style.fontSize = originalStyle.fontSize;
-          field.style.color = '#808080';
+          field.style.color = '#000000';
           field.style.fontWeight = '400';
           field.style.fontStyle = 'normal';
           text.replaceWith(field);
@@ -130,6 +129,53 @@
       });
     });
   }
+  async function markPageBoxes(root) {
+    const doc = root.ownerDocument;
+    await doc.fonts.ready;
+    await Promise.all([...root.querySelectorAll('img')].map(image => image.decode()));
+    await new Promise(resolve => doc.defaultView.requestAnimationFrame(() => {
+      doc.defaultView.requestAnimationFrame(resolve);
+    }));
+    // Measure the already paginated, unzoomed Word layout. During printing,
+    // place these boxes at exactly the same coordinates instead of allowing
+    // the browser to fragment a flex article/footer onto the next sheet.
+    for (const page of root.querySelectorAll('section.docx')) {
+      const bounds = page.getBoundingClientRect();
+      const boxes = [...page.children].filter(node => ['HEADER', 'ARTICLE', 'FOOTER'].includes(node.tagName))
+        .map(node => ({node, rect: node.getBoundingClientRect()}));
+      for (const {node, rect} of boxes) {
+        node.style.setProperty('--word-box-left', `${rect.left - bounds.left}px`);
+        node.style.setProperty('--word-box-top', `${rect.top - bounds.top}px`);
+        node.style.setProperty('--word-box-width', `${rect.width}px`);
+      }
+      page.classList.add('print-sheet');
+    }
+  }
+  const pageBoxCss = `
+    .docx-wrapper > section.docx.print-sheet {
+      display: block !important;
+      box-sizing: border-box !important;
+      width: 210mm !important;
+      /* A sub-millimetre allowance avoids full-page rounding on print drivers.
+         All visible content keeps its measured Word coordinates and font sizes. */
+      height: 296.8mm !important; min-height: 296.8mm !important;
+      position: relative !important;
+      break-inside: avoid-page; page-break-inside: avoid;
+    }
+    section.docx.print-sheet > header,
+    section.docx.print-sheet > article,
+    section.docx.print-sheet > footer {
+      position: absolute !important;
+      left: var(--word-box-left) !important;
+      top: var(--word-box-top) !important;
+      width: var(--word-box-width) !important;
+      margin: 0 !important;
+      break-inside: avoid-page; page-break-inside: avoid;
+    }
+  `;
+  const editorPrintStyle = document.createElement('style');
+  editorPrintStyle.textContent = `@media print { ${pageBoxCss} }`;
+  document.head.append(editorPrintStyle);
   const css = `
     @page { size: A4 portrait; margin: 0; }
     html, body { width: 210mm; margin: 0; padding: 0; background: white; }
@@ -154,7 +200,7 @@
     .docx p { outline: none; }
     .docx tr { break-inside: avoid; }
     .docx { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  `;
+  ` + pageBoxCss;
 
   async function prepare() {
     const wrapper = document.querySelector('#preview .docx-wrapper');
@@ -170,6 +216,11 @@
     doc.open();
     doc.write('<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Договор рассрочки</title></head><body></body></html>');
     doc.close();
+    // Match the editor's base metrics, including header/footer paragraph struts.
+    // A blank iframe otherwise starts at the browser's different 16px default.
+    const baseStyle = getComputedStyle(document.documentElement);
+    doc.documentElement.style.font = baseStyle.font;
+    doc.documentElement.style.color = baseStyle.color;
     for (const style of document.querySelectorAll('#docStyles style')) {
       doc.head.append(doc.importNode(style, true));
     }
@@ -195,5 +246,5 @@
     frame.contentWindow.focus();
     frame.contentWindow.print();
   }
-  window.ContractPrint = { prepare, run, normalizeDocument, normalizeXml, prepareWordFields };
+  window.ContractPrint = { prepare, run, normalizeDocument, normalizeXml, prepareWordFields, markPageBoxes };
 })();

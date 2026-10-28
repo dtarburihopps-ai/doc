@@ -28,9 +28,10 @@ for result in results:
     for page in doc:
         assert abs(page.rect.width * 25.4 / 72 - 210) < .2
         assert abs(page.rect.height * 25.4 / 72 - 297) < .2
-    for page in result['pages']:
+    for page_index, page in enumerate(result['pages']):
+        this_sheet = norm(doc[page_index].get_text())
         for paragraph in page['paragraphs']:
-            assert norm(paragraph) in text, (result['label'], paragraph)
+            assert norm(paragraph) in this_sheet, (result['label'], page_index+1, 'Text moved to another sheet', paragraph)
     images = [im for page in doc for im in page.get_image_info()]
     assert images[0]['width'] == 670  # New original logo, not the old 558px logo.
     assert abs(images[0]['bbox'][2] - images[0]['bbox'][0] - 152.96) < .1
@@ -48,7 +49,7 @@ for result in results:
                             for s in line['spans'] if s['text'] == str(index+1) and s['bbox'][1] > 740]
             assert len(footer_spans) == 1
             assert abs(footer_spans[0]['size'] - 12) < .01
-            assert footer_spans[0]['color'] == 0x808080, 'Page number must match the gray reference'
+            assert footer_spans[0]['color'] == 0x000000, 'Page number must be black'
             assert any(name in footer_spans[0]['font'].lower() for name in ['sans', 'arial', 'twcen']), 'Unavailable Office fonts must have a sans-serif fallback'
     spans = [s for page in doc for block in page.get_text('dict')['blocks'] if 'lines' in block
              for line in block['lines'] for s in line['spans']]
@@ -70,6 +71,10 @@ for result in results:
 
 shortcut = fitz.open(OUT / 'browser-shortcut.pdf')
 assert len(shortcut) == len(results[-1]['pages'])
+for index, expected in enumerate(results[-1]['pages']):
+    printed = norm(shortcut[index].get_text())
+    for paragraph in expected['paragraphs']:
+        assert norm(paragraph) in printed, 'Main-document printing moved text onto another sheet'
 assert 'Исходный текст' not in ''.join(p.get_text() for p in shortcut)
 assert len([im for page in shortcut for im in page.get_image_info()]) == 3
 
@@ -118,4 +123,4 @@ with ZipFile(OUT / 'filled.docx') as z:
     assert footer.xpath('//w:fldSimple[starts-with(@w:instr,"PAGE")]', namespaces=NS), 'Downloaded Word must keep its actual PAGE field'
 
 print(f'Verified: {len(results)} print scenarios, identical A4 geometry at 4 zoom levels, no missing text,')
-print('Visible footer strips with backgrounds off, automatic PAGE 2/3, and unchanged PAGE fields in Word.')
+print('Each paragraph stays on its preview sheet, visible footer strips, black sans-serif PAGE 2/3, unchanged Word.')
