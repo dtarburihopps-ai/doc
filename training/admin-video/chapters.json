@@ -1,0 +1,49 @@
+{
+  "appSha256": "d8a1c7aacfaa639fdbef2575975f34477fdefdbcf777fd9ac3f4d4cf25c631cf",
+  "duration": 148.76,
+  "chapters": [
+    {
+      "step": 0,
+      "title": "Настройте город и год",
+      "time": 0
+    },
+    {
+      "step": 1,
+      "title": "Вставьте информацию о рассрочке",
+      "time": 20.84
+    },
+    {
+      "step": 2,
+      "title": "Проверьте данные во втором окне",
+      "time": 37.8
+    },
+    {
+      "step": 2,
+      "title": "Паспортные данные — ниже во втором окне",
+      "time": 72.2
+    },
+    {
+      "step": 3,
+      "title": "Проверьте договор справа",
+      "time": 97.08
+    },
+    {
+      "step": 4,
+      "title": "Нажмите «Скачать и распечатать»",
+      "time": 131.6
+    }
+  ],
+  "checks": {
+    "wordDownloaded": true,
+    "officeSaved": true,
+    "automaticDeposit": true,
+    "termChanged": true,
+    "identityInPreview": true,
+    "roundedAmounts": [
+      12300,
+      12300,
+      12400
+    ],
+    "noExternalRequests": true
+  }
+}
