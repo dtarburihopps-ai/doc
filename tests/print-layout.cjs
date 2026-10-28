@@ -38,7 +38,7 @@ const message='Попов Владимир Геннадьевич\nПравое 
      const serialize=n=>n.nodeType===3?[3,n.nodeValue]:n.nodeType===1?[1,n.namespaceURI,n.localName,[...n.attributes].map(a=>[a.namespaceURI,a.name,a.value]),[...n.childNodes].map(serialize).filter(Boolean)]:null;
      return {tree:serialize(d.documentElement),scrollWidth:d.documentElement.scrollWidth,overflow:[...d.body.querySelectorAll('*')].filter(p=>p.getBoundingClientRect().right>795).map(p=>[p.tagName,p.className.baseVal??p.className,p.getBoundingClientRect().right]),pages:[...d.querySelectorAll('section.docx')].map(p=>{
        const rect=p.getBoundingClientRect(),a=p.querySelector('article'),f=p.querySelector('footer');
-       return {width:rect.width,height:rect.height,articleBottom:a?.getBoundingClientRect().bottom-rect.top,footerTop:f?.getBoundingClientRect().top-rect.top,footerFields:[...p.querySelectorAll('footer [data-word-field="PAGE"]')].map(n=>n.textContent),footerImages:[...p.querySelectorAll('footer img')].map(n=>({loaded:n.complete&&n.naturalWidth>0,width:n.getBoundingClientRect().width,height:n.getBoundingClientRect().height})),paragraphs:[...a.querySelectorAll('p')].map(p=>p.textContent)};
+       return {width:rect.width,height:rect.height,articleBottom:a?.getBoundingClientRect().bottom-rect.top,footerTop:f?.getBoundingClientRect().top-rect.top,footerFields:[...p.querySelectorAll('footer [data-word-field="PAGE"]')].map(n=>n.textContent),footerStyles:[...p.querySelectorAll('footer [data-word-field="PAGE"]')].map(n=>{const c=getComputedStyle(n);return{fontFamily:c.fontFamily,fontSize:c.fontSize,color:c.color}}),footerImages:[...p.querySelectorAll('footer img')].map(n=>({loaded:n.complete&&n.naturalWidth>0,width:n.getBoundingClientRect().width,height:n.getBoundingClientRect().height})),paragraphs:[...a.querySelectorAll('p')].map(p=>p.textContent)};
      })};
    });
    assert(data.pages.length>=2);
@@ -46,6 +46,7 @@ const message='Попов Владимир Геннадьевич\nПравое 
    for(const [index,p]of data.pages.entries()){
      assert(Math.abs(p.width-210*96/25.4)<1);assert(Math.abs(p.height-297*96/25.4)<1);assert(p.articleBottom<=p.footerTop,'Contract text must fit above its footer');
      assert.deepEqual(p.footerFields,index?[String(index+1)]:[],'Word PAGE field must count real pages');
+     for(const style of p.footerStyles){assert(style.fontFamily.includes('Tw Cen MT'));assert(style.fontFamily.includes('Arial, sans-serif'));assert.equal(style.fontSize,'16px');assert.equal(style.color,'rgb(128, 128, 128)')}
      assert.equal(p.footerImages.length,1);assert(p.footerImages[0].loaded,'Footer strip must be decoded before print');
      assert(Math.abs(p.footerImages[0].width-467.45*96/72)<.1,'Keep original Word drawing dimensions');
    }

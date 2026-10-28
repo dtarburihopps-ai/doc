@@ -44,6 +44,12 @@ for result in results:
         if index:
             footer_text = page.get_text(clip=fitz.Rect(0, 740, page.rect.width, page.rect.height))
             assert str(index+1) in footer_text.split(), 'Automatic page number is missing'
+            footer_spans = [s for block in page.get_text('dict')['blocks'] for line in block.get('lines',[])
+                            for s in line['spans'] if s['text'] == str(index+1) and s['bbox'][1] > 740]
+            assert len(footer_spans) == 1
+            assert abs(footer_spans[0]['size'] - 12) < .01
+            assert footer_spans[0]['color'] == 0x808080, 'Page number must match the gray reference'
+            assert any(name in footer_spans[0]['font'].lower() for name in ['sans', 'arial', 'twcen']), 'Unavailable Office fonts must have a sans-serif fallback'
     spans = [s for page in doc for block in page.get_text('dict')['blocks'] if 'lines' in block
              for line in block['lines'] for s in line['spans']]
     assert any(abs(s['size'] - 9) < .01 for s in spans), 'No automatic print scaling'

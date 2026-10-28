@@ -90,9 +90,18 @@
         const fields = [];
         while (walker.nextNode()) if (walker.currentNode.nodeValue.includes(pageMarker)) fields.push(walker.currentNode);
         for (const text of fields) {
+          const originalStyle = getComputedStyle(text.parentElement);
           const field = root.ownerDocument.createElement('span');
           field.dataset.wordField = 'PAGE';
           field.textContent = String(start + index);
+          // Keep the Word footer font (Tw Cen MT in this template), with a
+          // sans-serif fallback for PCs without that Office font. Match the
+          // gray page-number reference supplied by the user.
+          field.style.fontFamily = `${originalStyle.fontFamily}, Arial, sans-serif`;
+          field.style.fontSize = originalStyle.fontSize;
+          field.style.color = '#808080';
+          field.style.fontWeight = '400';
+          field.style.fontStyle = 'normal';
           text.replaceWith(field);
         }
       }
