@@ -9,6 +9,9 @@ text = html.read_text()
 text, count = re.subn(r'(<script id="contractPrint">)[\s\S]*?(</script>)',
                       lambda m: m[1] + '\n' + (root / 'src/print.js').read_text() + '\n' + m[2], text)
 assert count == 1
+text, count = re.subn(r'(<script id="contractEditing">)[\s\S]*?(</script>)',
+                      lambda m: m[1] + '\n' + (root / 'src/editing.js').read_text() + '\n' + m[2], text)
+assert count == 1
 html.write_text(text)
 with ZipFile(root / 'dist/contract-kit.zip', 'w', ZIP_DEFLATED, compresslevel=9) as z:
     for source, name in [('Договор рассрочки.html', 'Договор рассрочки.html'),
