@@ -63,7 +63,8 @@
 Для обновления архива: `python tools/package.py`.
 Исходники новой инструкции: [training/admin-guide](training/admin-guide).
 Переснять скриншоты: `node training/admin-guide/capture.cjs`;
-собрать PDF: `python training/admin-guide/build.py` (ReportLab, шрифт DejaVu Sans).
+собрать PDF: `python training/admin-guide/build.py` (ReportLab, Pillow, шрифт DejaVu Sans).
+Общие виды сжимаются для быстрой загрузки PDF; крупные планы сохраняются без потерь.
 Модуль сохранения редактируемых полей: [src/editing.js](src/editing.js).
 Исправления старого автономного JS-пакета воспроизводятся командой
 `python tools/apply-audit-fixes.py` (повторный запуск не дублирует изменения).

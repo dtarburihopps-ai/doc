@@ -1,7 +1,10 @@
 """Build the current illustrated staff guide from application screenshots."""
 from pathlib import Path
 from zipfile import ZipFile
+from io import BytesIO
 import json,math
+from PIL import Image
+from reportlab import rl_config
 from reportlab.pdfgen import canvas
 from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import A4
@@ -9,10 +12,14 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.utils import ImageReader
 
 HERE=Path(__file__).resolve().parent
 ROOT=HERE.parents[1]
 META=json.loads((HERE/'screens.json').read_text())
+# Binary streams avoid ASCII85 overhead; only full-window overview images are
+# downsampled. Close-ups, original PNG captures, fonts and vector text stay intact.
+rl_config.useA85=0
 for name,file in [('Body','DejaVuSans.ttf'),('Bold','DejaVuSans-Bold.ttf')]:
     pdfmetrics.registerFont(TTFont(name,'/usr/share/fonts/truetype/dejavu/'+file))
 pdfmetrics.registerFontFamily('Body',normal='Body',bold='Bold',italic='Body',boldItalic='Bold')
@@ -46,7 +53,18 @@ def image(name,x,top,w,max_h=None):
     data=META[name];h=w*data['height']/data['width']
     if max_h and h>max_h:w*=max_h/h;h=max_h
     box(x-3,top-3,w+6,h+6,r=6)
-    c.drawImage(str(HERE/data['file']),x,H-top-h,width=w,height=h,mask='auto')
+    source=HERE/data['file']
+    if name.startswith('overview-'):
+        with Image.open(source) as original:
+            overview=original.convert('RGB')
+        overview.thumbnail((1280,1280),Image.Resampling.LANCZOS)
+        compressed=BytesIO()
+        overview.save(compressed,format='JPEG',quality=78,subsampling=0,optimize=True)
+        compressed.seek(0)
+        source=ImageReader(compressed)
+    else:
+        source=str(source)
+    c.drawImage(source,x,H-top-h,width=w,height=h,mask='auto')
     return {'name':name,'x':x,'top':top,'w':w,'h':h,'scale':w/data['width']}
 
 def point(im,key,side='center'):
