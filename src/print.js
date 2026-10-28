@@ -1,55 +1,6 @@
 /* Print the document in its own A4 frame, independently of the editor's zoom,
    columns, window width and scroll position. No network or external assets. */
 (() => {
-  const wordNamespace = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
-  const pageMarker = '{{CONTRACT_PAGE_FIELD}}';
-
-  async function prepareWordFields(archive) {
-    // Work only on the temporary ZIP used by docx-preview. The original DOCX
-    // retains actual Word fields, cached results and header/footer references.
-    for (const name of Object.keys(archive.files)) {
-      if (!/^word\/(?:header|footer)\d+\.xml$/.test(name)) continue;
-      const xml = new DOMParser().parseFromString(await archive.file(name).async('string'), 'application/xml');
-      let changed = false;
-      for (const field of [...xml.getElementsByTagNameNS(wordNamespace, 'fldSimple')]) {
-        if (!/^\s*PAGE(?:\s|$)/i.test(field.getAttributeNS(wordNamespace, 'instr') || '')) continue;
-        const run = xml.createElementNS(wordNamespace, 'w:r');
-        const props = field.getElementsByTagNameNS(wordNamespace, 'rPr')[0];
-        if (props) run.append(props.cloneNode(true));
-        const text = xml.createElementNS(wordNamespace, 'w:t');
-        text.textContent = pageMarker;
-        run.append(text);
-        field.replaceWith(run);
-        changed = true;
-      }
-      // Also support PAGE fields stored as begin / instruction / separator /
-      // cached result / end runs (including fields inside content controls).
-      for (const paragraph of xml.getElementsByTagNameNS(wordNamespace, 'p')) {
-        let field = null;
-        for (const run of [...paragraph.children]) {
-          if (run.localName !== 'r') continue;
-          const char = run.getElementsByTagNameNS(wordNamespace, 'fldChar')[0];
-          const type = char?.getAttributeNS(wordNamespace, 'fldCharType');
-          if (type === 'begin') field = { instruction: '', result: [], separated: false };
-          if (!field) continue;
-          if (type === 'separate') field.separated = true;
-          if (!field.separated) {
-            for (const text of run.getElementsByTagNameNS(wordNamespace, 'instrText')) field.instruction += text.textContent;
-          } else {
-            field.result.push(...run.getElementsByTagNameNS(wordNamespace, 't'));
-          }
-          if (type === 'end') {
-            if (/^\s*PAGE(?:\s|$)/i.test(field.instruction) && field.result.length) {
-              field.result.forEach((text, index) => { text.textContent = index ? '' : pageMarker; });
-              changed = true;
-            }
-            field = null;
-          }
-        }
-      }
-      if (changed) archive.file(name, new XMLSerializer().serializeToString(xml));
-    }
-  }
   function normalizeXml(documentXml, settingsXml) {
     const ns = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
     const even = settingsXml.getElementsByTagNameNS(ns, 'evenAndOddHeaders')[0];
@@ -65,46 +16,11 @@
     }
   }
   function normalizeDocument(root, sourceXml) {
-    // Use standard images with the Word shape's exact dimensions in Chromium's
-    // frame-printing path. Decode them before opening the print dialog.
-    // This avoids VML -> SVG image loading/printing problems without redrawing
-    // or changing a single pixel of the supplied artwork.
-    for (const svg of root.querySelectorAll('svg')) {
-      if (svg.children.length !== 1 || svg.firstElementChild.localName !== 'image') continue;
-      const source = svg.firstElementChild.getAttribute('href');
-      if (!source) continue;
-      const image = root.ownerDocument.createElement('img');
-      image.alt = '';
-      image.src = source.replace(/^data:application\/octet-stream;base64,iVBOR/, 'data:image/png;base64,iVBOR')
-        .replace(/^data:application\/octet-stream;base64,\/9j\//, 'data:image/jpeg;base64,/9j/');
-      image.style.cssText = svg.style.cssText;
-      image.style.objectFit = 'fill';
-      image.dataset.wordDrawing = 'true';
-      svg.replaceWith(image);
+    // Word stretches these pictures to the shape's declared dimensions.
+    // SVG's default "meet" instead makes the new footer strip too narrow.
+    for (const image of root.querySelectorAll('svg image')) {
+      image.setAttribute('preserveAspectRatio', 'none');
     }
-    const startElement = sourceXml.getElementsByTagNameNS(wordNamespace, 'pgNumType')[0];
-    const start = Number(startElement?.getAttributeNS(wordNamespace, 'start') || 1);
-    [...root.querySelectorAll('section.docx')].forEach((page, index) => {
-      for (const region of page.querySelectorAll('header, footer')) {
-        const walker = root.ownerDocument.createTreeWalker(region, NodeFilter.SHOW_TEXT);
-        const fields = [];
-        while (walker.nextNode()) if (walker.currentNode.nodeValue.includes(pageMarker)) fields.push(walker.currentNode);
-        for (const text of fields) {
-          const originalStyle = getComputedStyle(text.parentElement);
-          const field = root.ownerDocument.createElement('span');
-          field.dataset.wordField = 'PAGE';
-          field.textContent = String(start + index);
-          // Keep the Word footer font (Tw Cen MT in this template), with a
-          // sans-serif fallback for PCs without that Office font.
-          field.style.fontFamily = `${originalStyle.fontFamily}, Arial, sans-serif`;
-          field.style.fontSize = originalStyle.fontSize;
-          field.style.color = '#000000';
-          field.style.fontWeight = '400';
-          field.style.fontStyle = 'normal';
-          text.replaceWith(field);
-        }
-      }
-    });
     // docx-preview omits Word's table indentation. The signature table has a
     // negative indent; without it, its right edge exceeds A4 and Chromium
     // scales the entire document down to fit the overflow.
@@ -129,53 +45,6 @@
       });
     });
   }
-  async function markPageBoxes(root) {
-    const doc = root.ownerDocument;
-    await doc.fonts.ready;
-    await Promise.all([...root.querySelectorAll('img')].map(image => image.decode()));
-    await new Promise(resolve => doc.defaultView.requestAnimationFrame(() => {
-      doc.defaultView.requestAnimationFrame(resolve);
-    }));
-    // Measure the already paginated, unzoomed Word layout. During printing,
-    // place these boxes at exactly the same coordinates instead of allowing
-    // the browser to fragment a flex article/footer onto the next sheet.
-    for (const page of root.querySelectorAll('section.docx')) {
-      const bounds = page.getBoundingClientRect();
-      const boxes = [...page.children].filter(node => ['HEADER', 'ARTICLE', 'FOOTER'].includes(node.tagName))
-        .map(node => ({node, rect: node.getBoundingClientRect()}));
-      for (const {node, rect} of boxes) {
-        node.style.setProperty('--word-box-left', `${rect.left - bounds.left}px`);
-        node.style.setProperty('--word-box-top', `${rect.top - bounds.top}px`);
-        node.style.setProperty('--word-box-width', `${rect.width}px`);
-      }
-      page.classList.add('print-sheet');
-    }
-  }
-  const pageBoxCss = `
-    .docx-wrapper > section.docx.print-sheet {
-      display: block !important;
-      box-sizing: border-box !important;
-      width: 210mm !important;
-      /* A sub-millimetre allowance avoids full-page rounding on print drivers.
-         All visible content keeps its measured Word coordinates and font sizes. */
-      height: 296.8mm !important; min-height: 296.8mm !important;
-      position: relative !important;
-      break-inside: avoid-page; page-break-inside: avoid;
-    }
-    section.docx.print-sheet > header,
-    section.docx.print-sheet > article,
-    section.docx.print-sheet > footer {
-      position: absolute !important;
-      left: var(--word-box-left) !important;
-      top: var(--word-box-top) !important;
-      width: var(--word-box-width) !important;
-      margin: 0 !important;
-      break-inside: avoid-page; page-break-inside: avoid;
-    }
-  `;
-  const editorPrintStyle = document.createElement('style');
-  editorPrintStyle.textContent = `@media print { ${pageBoxCss} }`;
-  document.head.append(editorPrintStyle);
   const css = `
     @page { size: A4 portrait; margin: 0; }
     html, body { width: 210mm; margin: 0; padding: 0; background: white; }
@@ -200,7 +69,7 @@
     .docx p { outline: none; }
     .docx tr { break-inside: avoid; }
     .docx { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  ` + pageBoxCss;
+  `;
 
   async function prepare() {
     const wrapper = document.querySelector('#preview .docx-wrapper');
@@ -216,11 +85,6 @@
     doc.open();
     doc.write('<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Договор рассрочки</title></head><body></body></html>');
     doc.close();
-    // Match the editor's base metrics, including header/footer paragraph struts.
-    // A blank iframe otherwise starts at the browser's different 16px default.
-    const baseStyle = getComputedStyle(document.documentElement);
-    doc.documentElement.style.font = baseStyle.font;
-    doc.documentElement.style.color = baseStyle.color;
     for (const style of document.querySelectorAll('#docStyles style')) {
       doc.head.append(doc.importNode(style, true));
     }
@@ -234,7 +98,7 @@
     }
     doc.body.append(content);
     await doc.fonts.ready;
-    await Promise.all([...doc.images].map(img => img.decode()));
+    await Promise.all([...doc.images].map(img => img.decode().catch(() => {})));
     await new Promise(resolve => frame.contentWindow.requestAnimationFrame(() => {
       frame.contentWindow.requestAnimationFrame(resolve);
     }));
@@ -246,5 +110,5 @@
     frame.contentWindow.focus();
     frame.contentWindow.print();
   }
-  window.ContractPrint = { prepare, run, normalizeDocument, normalizeXml, prepareWordFields, markPageBoxes };
+  window.ContractPrint = { prepare, run, normalizeDocument, normalizeXml };
 })();

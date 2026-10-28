@@ -12,7 +12,6 @@ assert count == 1
 html.write_text(text)
 with ZipFile(root / 'dist/contract-kit.zip', 'w', ZIP_DEFLATED, compresslevel=9) as z:
     for source, name in [('Договор рассрочки.html', 'Договор рассрочки.html'),
-                         ('Как пользоваться.txt', 'Как пользоваться.txt'),
-                         ('staff-guide.pdf', 'Инструкция для сотрудников.pdf')]:
+                         ('Как пользоваться.txt', 'Как пользоваться.txt')]:
         z.write(root / 'dist' / source, name)
 print('Standalone HTML and staff ZIP updated')
