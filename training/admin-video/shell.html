@@ -1,25 +1,84 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Договор рассрочки — обучение</title>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Договор рассрочки — обучение</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:1920px;height:1080px;overflow:hidden;font-family:"DejaVu Sans",Arial,sans-serif;color:#23322f;background:#eef4f0}
-header{height:132px;background:#fff;border-bottom:3px solid #23634e;display:flex;align-items:center;padding:24px 44px;gap:24px;position:relative;z-index:5}
-#step{width:72px;height:72px;flex-shrink:0;display:grid;place-items:center;background:#23634e;color:#fff;font-size:38px;border-radius:20px}
-h1{font-size:31px;line-height:1.2;margin:0 0 10px;font-weight:700;letter-spacing:-.5px}#subtitle{font-size:22px;line-height:1.3;color:#5b6b63}#example{position:absolute;right:32px;top:12px;font-size:11px;letter-spacing:1px;color:#849089}
-#stage{position:absolute;left:0;top:132px;width:1920px;height:876px;overflow:hidden;background:#edf5ef}#app{position:absolute;width:1600px;height:1000px;border:0;transform-origin:0 0;transition:transform 1000ms cubic-bezier(.35,0,.2,1);background:#eef2ef}
-footer{height:72px;position:absolute;bottom:0;left:0;width:1920px;background:#fff;border-top:1px solid #e1e8e3;display:flex;align-items:center;justify-content:center;gap:22px;font-size:19px;color:#728178;z-index:6}footer span{padding:11px 17px;border-radius:10px}footer span.active{background:#23634e;color:#fff}footer i{font-style:normal;color:#a5aea8}
-#cursor{position:absolute;left:0;top:0;z-index:20;pointer-events:none;width:37px;height:49px;filter:drop-shadow(1px 3px 3px #0005);transition:left 650ms ease-in-out,top 650ms ease-in-out;display:none}
-#click{position:absolute;z-index:19;pointer-events:none;width:54px;height:54px;border:4px solid #e38b38;background:#ffcd6a55;border-radius:50%;opacity:0;transform:translate(-50%,-50%)}#click.go{animation:pulse .6s ease-out}@keyframes pulse{0%{opacity:1;scale:.45}70%{opacity:.8}100%{opacity:0;scale:1.25}}
+*{box-sizing:border-box}html,body{margin:0;width:1920px;height:1080px;overflow:hidden;font-family:"DejaVu Sans",Arial,sans-serif;color:#29362f;background:#edf3ef}
+#stage{position:absolute;inset:0;overflow:hidden}#app{position:absolute;width:1600px;height:1000px;border:0;transform-origin:0 0;transition:transform 650ms cubic-bezier(.3,0,.2,1);background:#eef2ef}
+#outline{position:absolute;z-index:10;pointer-events:none;border:3px solid #617969;border-radius:9px;box-shadow:0 0 0 2px #ffffffdd;display:none}
+#connector{position:absolute;inset:0;width:1920px;height:1080px;pointer-events:none;z-index:11}#connector path{fill:none;stroke:#a9b4ac;stroke-width:2}
+#tip{position:absolute;z-index:12;width:420px;padding:23px 25px;background:#fffefb;border:2px solid #b7c0b9;border-radius:14px;box-shadow:0 8px 28px #1c32221a;pointer-events:none;opacity:0;transition:opacity 150ms ease}
+#tip-title{font-size:25px;line-height:1.28;font-weight:700;letter-spacing:-.3px}#tip-body{font-size:20px;line-height:1.45;color:#667269;margin-top:10px}#tip-body:empty{display:none}
+#cursor{position:absolute;left:0;top:0;z-index:20;pointer-events:none;width:40px;height:52px;filter:drop-shadow(1px 3px 3px #0005);transform-origin:3px 3px;transition:left 320ms ease-in-out,top 320ms ease-in-out,transform 110ms ease;display:none}#cursor.pressed{transform:scale(.78)}
+#click{position:absolute;z-index:19;pointer-events:none;width:80px;height:80px;transform:translate(-50%,-50%);opacity:0}#click:before,#click:after{content:"";position:absolute;inset:0;border:3px solid #bc8545;border-radius:50%;background:#e8b45f20}#click:after{inset:24px;background:#e8b45f90;border:2px solid #ffffffdd}#click.go{animation:ripple .7s ease-out}#click.go:after{animation:core .7s ease-out}@keyframes ripple{0%{opacity:1;scale:.3}35%{opacity:1}100%{opacity:0;scale:1.25}}@keyframes core{0%{opacity:1}100%{opacity:0;scale:.35}}
 </style></head><body>
-<header><div id="step">0</div><div><h1 id="title">Настройте город и год</h1><div id="subtitle">Только один раз. Если понадобится изменить — повторите шаг 0.</div></div><div id="example">УЧЕБНЫЙ ПРИМЕР · ДАННЫЕ ВЫМЫШЛЕННЫЕ</div></header>
 <div id="stage"><iframe id="app" src="/app" title="Договор рассрочки"></iframe></div>
-<footer><span data-step="0">0. Город и год</span><i>→</i><span data-step="1">1. Информация о рассрочке</span><i>→</i><span data-step="2">2. Данные</span><i>→</i><span data-step="3">3. Проверка</span><i>→</i><span data-step="4">4. Скачивание</span></footer>
-<div id="click"></div>
-<svg id="cursor" viewBox="0 0 37 49" xmlns="http://www.w3.org/2000/svg"><path d="M3 3 L3 37 L12 29 L20 45 L27 41 L19 26 L33 26 Z" fill="#183f32" stroke="white" stroke-width="3" stroke-linejoin="round"/></svg>
+<div id="outline"></div><svg id="connector"><path/></svg>
+<aside id="tip"><div id="tip-title"></div><div id="tip-body"></div></aside>
+<div id="click"></div><svg id="cursor" viewBox="0 0 37 49" xmlns="http://www.w3.org/2000/svg"><path d="M3 3 L3 37 L12 29 L20 45 L27 41 L19 26 L33 26 Z" fill="#244c3c" stroke="white" stroke-width="3" stroke-linejoin="round"/></svg>
 <script>
-window.lesson={
- title(step,title,subtitle){document.querySelector('#step').textContent=step;document.querySelector('#title').textContent=title;document.querySelector('#subtitle').textContent=subtitle;document.querySelectorAll('[data-step]').forEach(n=>n.classList.toggle('active',n.dataset.step===String(step)))},
- camera(scale,x,y,instant=false){const n=document.querySelector('#app');n.style.transitionDuration=instant?'0ms':'1000ms';n.style.transform=`translate(${x}px,${y}px) scale(${scale})`;document.querySelector('#cursor').style.display='none'},
- cursor(x,y,instant=false){const n=document.querySelector('#cursor');n.style.transitionDuration=instant?'0ms':'650ms';n.style.left=(x-3)+'px';n.style.top=(y-3)+'px';n.style.display='block'},
- click(x,y){const n=document.querySelector('#click');n.style.left=x+'px';n.style.top=y+'px';n.classList.remove('go');void n.offsetWidth;n.classList.add('go')}
-};window.lesson.title(0,'Настройте город и год','Только один раз. Если понадобится изменить — повторите шаг 0.');
+(() => {
+ const app=document.querySelector('#app'),outline=document.querySelector('#outline'),tip=document.querySelector('#tip'),connector=document.querySelector('#connector path');
+ let focus=null,visible=false,preferred='right';
+ const stats={samples:0,maxAlignmentError:0,maxTipOverlap:0,clicks:0,cards:[],targetChanges:0};
+ function intersection(a,b){const x=Math.max(a.x,b.x),y=Math.max(a.y,b.y),r=Math.min(a.x+a.width,b.x+b.width),d=Math.min(a.y+a.height,b.y+b.height);return r>x&&d>y?{x,y,width:r-x,height:d-y}:null}
+ function targetRect(){
+  const doc=app.contentDocument;if(!doc||!focus)return null;
+  const spec=typeof focus==='string'?{selectors:[focus]}:focus;
+  const rects=[];
+  for(const selector of spec.selectors){
+   let node=doc.querySelector(selector);if(spec.closest&&node)node=node.closest(spec.closest);if(!node)continue;
+   const raw=node.getBoundingClientRect();if(raw.width<1||raw.height<1)continue;
+   let r={x:raw.x,y:raw.y,width:raw.width,height:raw.height};
+   for(let parent=node.parentElement;parent&&r;parent=parent.parentElement){
+    const css=app.contentWindow.getComputedStyle(parent),p=parent.getBoundingClientRect();
+    const cx=/(auto|scroll|hidden|clip)/.test(css.overflowX),cy=/(auto|scroll|hidden|clip)/.test(css.overflowY);
+    if(cx||cy)r=intersection(r,{x:cx?p.x:-100000,y:cy?p.y:-100000,width:cx?p.width:200000,height:cy?p.height:200000});
+   }
+   if(r)rects.push(r);
+  }
+  if(!rects.length)return null;
+  const x=Math.min(...rects.map(r=>r.x)),y=Math.min(...rects.map(r=>r.y)),right=Math.max(...rects.map(r=>r.x+r.width)),bottom=Math.max(...rects.map(r=>r.y+r.height));
+  const f=app.getBoundingClientRect(),sx=f.width/app.clientWidth,sy=f.height/app.clientHeight;
+  return intersection({x:f.x+x*sx,y:f.y+y*sy,width:(right-x)*sx,height:(bottom-y)*sy},{x:8,y:8,width:1904,height:1064});
+ }
+ function place(r){
+  const w=tip.offsetWidth,h=tip.offsetHeight,gap=30,margin=24;
+  const candidates={right:{x:r.x+r.width+gap,y:r.y+r.height/2-h/2},left:{x:r.x-gap-w,y:r.y+r.height/2-h/2},top:{x:r.x+r.width/2-w/2,y:r.y-gap-h},bottom:{x:r.x+r.width/2-w/2,y:r.y+r.height+gap}};
+  const order=[preferred,...['right','left','top','bottom'].filter(s=>s!==preferred)];
+  let best;
+  for(const side of order){let p=candidates[side];p={x:Math.max(margin,Math.min(1920-margin-w,p.x)),y:Math.max(margin,Math.min(1080-margin-h,p.y))};const overlap=intersection({...p,width:w,height:h},r);const penalty=overlap?overlap.width*overlap.height:0;if(!best||penalty<best.penalty)best={...p,side,penalty};if(!penalty)break;}
+  tip.style.left=best.x+'px';tip.style.top=best.y+'px';
+  const middle={x:best.x+w/2,y:best.y+h/2};
+  const end={x:Math.max(r.x,Math.min(r.x+r.width,middle.x)),y:Math.max(r.y,Math.min(r.y+r.height,middle.y))};
+  const start={x:Math.max(best.x,Math.min(best.x+w,end.x)),y:Math.max(best.y,Math.min(best.y+h,end.y))};
+  connector.setAttribute('d',`M${start.x},${start.y} L${end.x},${end.y}`);
+  return best.penalty;
+ }
+ function update(){
+  if(visible){
+   const r=targetRect();
+   if(r){
+    outline.style.display='block';Object.assign(outline.style,{left:(r.x-5)+'px',top:(r.y-5)+'px',width:(r.width+10)+'px',height:(r.height+10)+'px'});
+    const overlap=place({x:r.x-7,y:r.y-7,width:r.width+14,height:r.height+14});connector.style.display='';
+    const b=outline.getBoundingClientRect();const error=Math.max(Math.abs(b.x-(r.x-5)),Math.abs(b.y-(r.y-5)),Math.abs(b.width-(r.width+10)),Math.abs(b.height-(r.height+10)));
+    stats.samples++;stats.maxAlignmentError=Math.max(stats.maxAlignmentError,error);stats.maxTipOverlap=Math.max(stats.maxTipOverlap,overlap);
+   }else{outline.style.display='none';connector.style.display='none';}
+  }else{outline.style.display='none';connector.style.display='none';}
+  requestAnimationFrame(update);
+ }
+ window.lesson={
+  show(title,body,target,side='right'){
+   visible=true;focus=target;preferred=side;stats.cards.push(title);stats.targetChanges++;
+   tip.style.opacity='0';document.querySelector('#tip-title').textContent=title;document.querySelector('#tip-body').textContent=body||'';
+   updateOnce();requestAnimationFrame(()=>tip.style.opacity='1');
+  },
+  target(target,side=preferred){focus=target;preferred=side;stats.targetChanges++;updateOnce()},
+  hide(){visible=false;tip.style.opacity='0'},
+  camera(scale,x,y,instant=false){app.style.transitionDuration=instant?'0ms':'650ms';app.style.transform=`translate(${x}px,${y}px) scale(${scale})`;document.querySelector('#cursor').style.display='none'},
+  cursor(x,y,instant=false){const n=document.querySelector('#cursor');n.style.transitionDuration=instant?'0ms':'320ms';n.style.left=(x-3)+'px';n.style.top=(y-3)+'px';n.style.display='block'},
+  press(down,x,y){const n=document.querySelector('#cursor');n.classList.toggle('pressed',down);if(down){stats.clicks++;const ring=document.querySelector('#click');ring.style.left=x+'px';ring.style.top=y+'px';ring.classList.remove('go');void ring.offsetWidth;ring.classList.add('go')}},
+  metrics(){return{...stats,focus,tip:tip.getBoundingClientRect().toJSON(),target:targetRect(),outline:outline.getBoundingClientRect().toJSON()}},
+ };
+ function updateOnce(){const r=targetRect();if(r)place({x:r.x-7,y:r.y-7,width:r.width+14,height:r.height+14})}
+ requestAnimationFrame(update);
+})();
 </script></body></html>

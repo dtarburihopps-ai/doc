@@ -1,6 +1,6 @@
 {
   "appSha256": "d8a1c7aacfaa639fdbef2575975f34477fdefdbcf777fd9ac3f4d4cf25c631cf",
-  "duration": 123.28,
+  "duration": 72.12,
   "chapters": [
     {
       "step": 0,
@@ -9,58 +9,72 @@
     },
     {
       "step": 1,
-      "title": "Вставьте информацию о рассрочке",
-      "time": 20.12
+      "title": "Вставьте сообщение специалиста",
+      "time": 15.2
     },
     {
       "step": 2,
-      "title": "Проверьте данные во втором окне",
-      "time": 30.92
+      "title": "Дополните пустые поля",
+      "time": 25.52
     },
     {
       "step": 2,
-      "title": "Прокрутите до «Реквизиты покупателя»",
-      "time": 59.12
+      "title": "Введите паспортные данные",
+      "time": 33.72
     },
     {
       "step": 3,
-      "title": "Проверьте договор справа",
-      "time": 85.36
+      "title": "Проверьте все данные!",
+      "time": 51.36
     },
     {
       "step": 4,
       "title": "Нажмите «Скачать и распечатать»",
-      "time": 109.64
+      "time": 65.96
     }
   ],
   "checks": {
     "wordDownloaded": true,
-    "officeSaved": true,
-    "automaticDeposit": true,
+    "popupGuidance": true,
+    "noPermanentPanels": true,
+    "domTrackedFrames": true,
+    "maxFrameError": 0.015621948242142025,
+    "alignmentSamples": 3725,
+    "noTipOverlap": true,
+    "animatedClicks": 14,
+    "singleReviewNotice": true,
     "noTermChangeDemo": true,
-    "noFloatingFrames": true,
     "fullPrintedPages": [
       {
         "page": 1,
-        "x": 674.40625,
-        "y": 165.84375,
-        "width": 571.1875,
-        "height": 808.3125
+        "x": 786.796875,
+        "y": 68.484375,
+        "width": 666.40625,
+        "height": 943.03125
       },
       {
         "page": 2,
-        "x": 674.40625,
-        "y": 165.84375,
-        "width": 571.1875,
-        "height": 808.3125
+        "x": 786.796875,
+        "y": 68.484375,
+        "width": 666.40625,
+        "height": 943.03125
       }
     ],
-    "identityInPreview": true,
-    "roundedAmounts": [
-      12300,
-      12300,
-      12400
-    ],
     "noExternalRequests": true
-  }
+  },
+  "cards": [
+    "Нажмите «Настройки»",
+    "Введите город и год",
+    "Нажмите «Сохранить»",
+    "Настройки сохранены",
+    "Вставьте сообщение специалиста",
+    "Нажмите «Распознать»",
+    "Дополните пустые поля",
+    "Укажите дату договора",
+    "Введите паспортные данные",
+    "Укажите адрес и телефон",
+    "Проверьте все данные!",
+    "Нажмите «Скачать и распечатать»",
+    "Готово!"
+  ]
 }
