@@ -9,90 +9,90 @@
     {
       "step": 0,
       "title": "Выберите специалиста",
-      "time": 15.48
+      "time": 17.88
     },
     {
       "step": 1,
       "title": "Вставьте сообщение специалиста",
-      "time": 19.56
+      "time": 22.6
     },
     {
       "step": 2,
       "title": "Данные уже во втором окне",
-      "time": 27.28
+      "time": 31.6
     },
     {
       "step": 2,
       "title": "Введите паспортные данные",
-      "time": 43.64
+      "time": 53.88
     },
     {
       "step": 3,
       "title": "Проверьте все данные!",
-      "time": 59.08
+      "time": 71.36
     },
     {
       "step": 4,
       "title": "Нажмите «Скачать и распечатать»",
-      "time": 63.64
+      "time": 76.48
     }
   ],
   "shots": [
     {
       "name": "00-overview",
-      "time": 1.44
+      "time": 1.96
     },
     {
       "name": "01-city-year",
-      "time": 7.76
+      "time": 9.16
     },
     {
       "name": "02-specialists",
-      "time": 11.32
+      "time": 13.32
     },
     {
       "name": "03-settings-saved",
-      "time": 14.32
+      "time": 16.88
     },
     {
       "name": "04-specialist-selected",
-      "time": 18.8
+      "time": 21.84
     },
     {
       "name": "05-message",
-      "time": 24.16
+      "time": 27.84
     },
     {
       "name": "06-recognized",
-      "time": 29.88
+      "time": 34.68
     },
     {
       "name": "07-amounts",
-      "time": 33.96
+      "time": 39.28
     },
     {
       "name": "08-dates",
-      "time": 41.16
+      "time": 51.32
     },
     {
       "name": "09-passport",
-      "time": 50.4
+      "time": 61.72
     },
     {
       "name": "10-contacts",
-      "time": 56.64
+      "time": 68.8
     },
     {
       "name": "11-whole-document",
-      "time": 62.88
+      "time": 75.72
     },
     {
       "name": "12-download",
-      "time": 65.12
+      "time": 78.4
     },
     {
       "name": "13-finished",
-      "time": 69.28
+      "time": 83.2
     }
   ],
   "checks": {
@@ -110,7 +110,7 @@
     "wordDownloaded": true
   },
   "metrics": {
-    "samples": 3339,
+    "samples": 4173,
     "maxAlignmentError": 0.015612792968681788,
     "maxTipOverlap": 0,
     "clicks": 15,
@@ -162,10 +162,10 @@
     }
   },
   "recording": {
-    "output": "/tmp/trial-staff-video-final/recorded-lesson.mp4",
-    "frames": 1733,
-    "updates": 1886,
-    "duration": 69.32,
-    "bytes": 4717175
+    "output": "/tmp/trial-staff-video-slower/recorded-lesson.mp4",
+    "frames": 2080,
+    "updates": 2307,
+    "duration": 83.2,
+    "bytes": 4724194
   }
 }

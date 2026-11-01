@@ -34,7 +34,7 @@ const people=['Иванов И. И.','Петрова А. В.'];
   async function tip(step,title,body,target,side='left',chapter=false){
    await page.evaluate(v=>lesson.show(...v),[title,body,target,side]);
    if(chapter)chapters.push({step,title,time:recorder?recorder.seconds:0});
-   console.log('Action:',title);await pause(1300);
+   console.log('Action:',title);await pause(1800);
   }
   async function target(t,side='left'){await page.evaluate(v=>lesson.target(...v),[t,side])}
   async function hide(){await page.evaluate(()=>lesson.hide())}
@@ -49,18 +49,18 @@ const people=['Иванов И. И.','Петрова А. В.'];
    const x=r.x+r.width*.52,y=r.y+r.height/2;
    assert(x>8&&x<1912&&y>8&&y<1072,`Pointer outside screen: ${selector} ${x},${y}`);
    await page.evaluate(v=>lesson.cursor(v.x,v.y,v.instant),{x,y,instant:preview});
-   await page.mouse.move(x,y,{steps:8});await pause(280);
+   await page.mouse.move(x,y,{steps:8});await pause(360);
    if(click){
     await page.evaluate(v=>lesson.press(true,v.x,v.y),{x,y});await page.mouse.down();await page.waitForTimeout(110);
     if(selector==='#saveSettings')await page.screenshot({path:path.join(out,(preview?'preview-':'')+'click-feedback.png')});
-    await page.mouse.up();await page.evaluate(v=>lesson.press(false,v.x,v.y),{x,y});await pause(170);
+    await page.mouse.up();await page.evaluate(v=>lesson.press(false,v.x,v.y),{x,y});await pause(220);
    }
   }
   async function fill(selector,value,{paste=false}={}){
    await point(selector,true);
    if(paste)await loc(selector).fill(value);
    else{await loc(selector).press('Control+A');await loc(selector).pressSequentially(value,{delay:preview?0:23})}
-   await flush();await pause(170);
+   await flush();await pause(230);
   }
   async function scroll(selector,offset=20){
    const n=loc(selector);
@@ -134,9 +134,9 @@ const people=['Иванов И. И.','Петрова А. В.'];
   await pause(800);await shot('07-amounts');
   await hide();await camera();await scroll('#dateFields',20);await camera('#dateFields',1.45);
   await tip(2,'Укажите дату бланка','Например, нажмите «Сегодня».',fields('#contractDate'));
-  await point('#contractDateToday',true);await flush();
+  await point('#contractDateToday',true);await flush();await pause(700);
   await tip(2,'Срок уже рассчитан','Неделя и дата посещения — автоматически. При необходимости исправьте.',fields('#startDate','#endDate','#visitDate'));
-  await pause(800);await shot('08-dates');
+  await pause(3800);await shot('08-dates');
 
   await hide();await camera();await scroll('#identityFields',20);await camera('#identityFields',1.4);
   await tip(2,'Введите паспортные данные','Серию и номер, дату выдачи и кем выдан.',fields('#passport','#passportDate','#passportIssuer'),'left',true);
