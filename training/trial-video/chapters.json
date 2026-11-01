@@ -1,0 +1,171 @@
+{
+  "appSha256": "a853e1dafbbf96941f1b95d57b137ce9d6f62347eddeb4a532142acd0abd5ade",
+  "chapters": [
+    {
+      "step": 0,
+      "title": "Нажмите «Настройки»",
+      "time": 0
+    },
+    {
+      "step": 0,
+      "title": "Выберите специалиста",
+      "time": 15.48
+    },
+    {
+      "step": 1,
+      "title": "Вставьте сообщение специалиста",
+      "time": 19.56
+    },
+    {
+      "step": 2,
+      "title": "Данные уже во втором окне",
+      "time": 27.28
+    },
+    {
+      "step": 2,
+      "title": "Введите паспортные данные",
+      "time": 43.64
+    },
+    {
+      "step": 3,
+      "title": "Проверьте все данные!",
+      "time": 59.08
+    },
+    {
+      "step": 4,
+      "title": "Нажмите «Скачать и распечатать»",
+      "time": 63.64
+    }
+  ],
+  "shots": [
+    {
+      "name": "00-overview",
+      "time": 1.44
+    },
+    {
+      "name": "01-city-year",
+      "time": 7.76
+    },
+    {
+      "name": "02-specialists",
+      "time": 11.32
+    },
+    {
+      "name": "03-settings-saved",
+      "time": 14.32
+    },
+    {
+      "name": "04-specialist-selected",
+      "time": 18.8
+    },
+    {
+      "name": "05-message",
+      "time": 24.16
+    },
+    {
+      "name": "06-recognized",
+      "time": 29.88
+    },
+    {
+      "name": "07-amounts",
+      "time": 33.96
+    },
+    {
+      "name": "08-dates",
+      "time": 41.16
+    },
+    {
+      "name": "09-passport",
+      "time": 50.4
+    },
+    {
+      "name": "10-contacts",
+      "time": 56.64
+    },
+    {
+      "name": "11-whole-document",
+      "time": 62.88
+    },
+    {
+      "name": "12-download",
+      "time": 65.12
+    },
+    {
+      "name": "13-finished",
+      "time": 69.28
+    }
+  ],
+  "checks": {
+    "settingsSurviveReload": true,
+    "specialistNotAutoSelected": true,
+    "recognition": true,
+    "depositEqualsTotal": true,
+    "wholeDocumentVisible": {
+      "x": 806.796875,
+      "y": 68.484375,
+      "width": 666.40625,
+      "height": 943.03125
+    },
+    "allFieldsFilled": true,
+    "wordDownloaded": true
+  },
+  "metrics": {
+    "samples": 3339,
+    "maxAlignmentError": 0.015612792968681788,
+    "maxTipOverlap": 0,
+    "clicks": 15,
+    "cards": [
+      "Нажмите «Настройки»",
+      "Введите город и год",
+      "Добавьте специалистов",
+      "Нажмите «Сохранить»",
+      "Выберите специалиста",
+      "Вставьте сообщение специалиста",
+      "Нажмите «Распознать»",
+      "Данные уже во втором окне",
+      "Залог заполнился сам",
+      "Укажите дату бланка",
+      "Срок уже рассчитан",
+      "Введите паспортные данные",
+      "Укажите адрес и телефон",
+      "Проверьте все данные!",
+      "Нажмите «Скачать и распечатать»",
+      "Готово!"
+    ],
+    "targetChanges": 16,
+    "focus": "#download",
+    "tip": {
+      "x": 1119.28125,
+      "y": 24,
+      "width": 420,
+      "height": 150,
+      "top": 24,
+      "right": 1539.28125,
+      "bottom": 174,
+      "left": 1119.28125
+    },
+    "target": {
+      "x": 1576.2871875,
+      "y": 50.1609375,
+      "width": 177.2728125000001,
+      "height": 41.1028125
+    },
+    "outline": {
+      "x": 1571.28125,
+      "y": 45.15625,
+      "width": 187.265625,
+      "height": 51.09375,
+      "top": 45.15625,
+      "right": 1758.546875,
+      "bottom": 96.25,
+      "left": 1571.28125
+    }
+  },
+  "recording": {
+    "output": "/tmp/trial-staff-video-final/recorded-lesson.mp4",
+    "frames": 1733,
+    "updates": 1886,
+    "duration": 69.32,
+    "bytes": 4717175
+  }
+}
